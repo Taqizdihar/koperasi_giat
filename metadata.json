@@ -1,0 +1,8 @@
+{
+  "name": "Copy of Koperasi GIAT Company Profile",
+  "description": "Website company profile profesional dan modern untuk Koperasi GIAT, menampilkan layanan simpan pinjam, unit usaha, dan sistem keanggotaan berbasis gotong royong.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
