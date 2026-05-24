@@ -61,3 +61,26 @@ export interface CmsPage {
   is_contact_form_active: boolean;
 }
 
+export interface CmsPostContent {
+  excerpt: string;
+  featured_image: string | null;
+  body_content: string;
+  tags: string;
+}
+
+export interface CmsPost {
+  id: number;
+  tenant_id: number;
+  title: string;
+  slug: string;
+  category: string;
+  excerpt: string;
+  content: CmsPostContent[];
+  featured_image_id: number | null;
+  status: string;
+  author_id: number | null;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+

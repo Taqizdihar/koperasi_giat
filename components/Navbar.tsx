@@ -24,6 +24,8 @@ const Navbar: React.FC = () => {
 
   const getPathFromSlug = (slug: string) => {
     if (slug === 'koperasi-giat') return '/';
+    if (slug === 'tentang-kami') return '/tentang';
+    if (slug === 'layanan-produk') return '/layanan';
     return `/${slug}`;
   };
 

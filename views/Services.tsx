@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { 
   Wallet, 
   PiggyBank, 
@@ -24,6 +25,8 @@ import {
   ShoppingBag
 } from 'lucide-react';
 import { RETAIL_PRODUCTS } from '../constants';
+import { fetchCmsPages } from '../services/dataService';
+import { CmsPage, PageBlock } from '../types';
 
 interface ServiceDetail {
   id: string;
@@ -175,17 +178,121 @@ const FAQ_ITEMS = [
   }
 ];
 
+// Helper to dynamically get icons matching service title
+const getServiceIcon = (title: string) => {
+  const normalizedTitle = title.toLowerCase().trim();
+  if (normalizedTitle.includes('simpan') || normalizedTitle.includes('pinjam')) {
+    return <Wallet className="w-10 h-10" />;
+  }
+  if (normalizedTitle.includes('pengadaan')) {
+    return <Package className="w-10 h-10" />;
+  }
+  if (normalizedTitle.includes('ritel') || normalizedTitle.includes('retail') || normalizedTitle.includes('toko')) {
+    return <Store className="w-10 h-10" />;
+  }
+  if (normalizedTitle.includes('marketplace') || normalizedTitle.includes('pasar')) {
+    return <ShoppingBag className="w-10 h-10" />;
+  }
+  if (normalizedTitle.includes('fotocopy') || normalizedTitle.includes('atk') || normalizedTitle.includes('print')) {
+    return <Printer className="w-10 h-10" />;
+  }
+  return <Wallet className="w-10 h-10" />; // Default fallback
+};
+
+// Helper to parse double line breaks for description/benefits separation
+const parseCmsServiceItem = (item: any) => {
+  const parts = (item.description || '').split('\n\n');
+  const mainDescription = parts[0] || '';
+  const benefits = parts[1]
+    ? parts[1].split('\n').map((line: string) => line.trim()).filter((line: string) => line.length > 0)
+    : [];
+  return {
+    title: item.title || '',
+    description: mainDescription,
+    benefits: benefits
+  };
+};
+
 const Services: React.FC = () => {
+  const [pages, setPages] = useState<CmsPage[] | null>(null);
+  const [loading, setLoading] = useState(true);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const data = await fetchCmsPages();
+      if (data) setPages(data);
+      setLoading(false);
+    };
+    loadData();
+  }, []);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
+  if (loading) {
+    return (
+      <div className="h-screen bg-[#020617] flex flex-col items-center justify-center space-y-6">
+        <motion.div 
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+          className="w-16 h-16 border-4 border-t-giat-red border-r-transparent border-b-white border-l-transparent rounded-full shadow-2xl shadow-giat-red/20"
+        />
+        <div className="flex flex-col items-center space-y-1">
+          <span className="text-2xl font-black tracking-tighter text-white">GIAT</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Loading CMS...</span>
+        </div>
+      </div>
+    );
+  }
+
+  const servicesPagesArray = pages && Array.isArray(pages) ? pages : [];
+  const servicesPage = servicesPagesArray.find(p => p && (p.slug === 'layanan-produk' || p.slug === 'layanan')) || servicesPagesArray[0];
+  
+  const ctaBlock = servicesPage?.content?.find((block: PageBlock) => block && block.type === 'cta-banner');
+  const featuresBlock = servicesPage?.content?.find((block: PageBlock) => block && block.type === 'features');
+
+  // Extract Hero (cta-banner) details safely
+  const heroHeadline = ctaBlock?.data?.headline || "Layanan & Produk GIAT";
+  const heroSubHeadline = ctaBlock?.data?.sub_headline || "Kami menghadirkan ekosistem ekonomi gotong royong melalui akses simpan pinjam yang adil, pembiayaan modal usaha produktif, tabungan masa depan, serta program pemberdayaan UMKM, perlindungan asuransi, dan berbagai produk ekonomi kreatif bagi seluruh anggota.";
+  const heroBgColor = ctaBlock?.data?.background_color || "#153B8F";
+  const heroBgImageUrl = ctaBlock?.data?.background_image_url || null;
+  const heroButtonText = ctaBlock?.data?.button_text || "Konsultasi Sekarang";
+  const heroButtonLink = ctaBlock?.data?.button_link || "/kontak";
+
+  // Extract features details safely
+  const featuresTitle = featuresBlock?.data?.title || "Layanan & Produk Unggulan";
+  const featuresSubtitle = featuresBlock?.data?.subtitle || "Portofolio Kami";
+
+  // Build the dynamic services list using features block items, with fallback to local SERVICE_LIST
+  const dynamicServices = featuresBlock?.data?.items && Array.isArray(featuresBlock.data.items) && featuresBlock.data.items.length > 0
+    ? featuresBlock.data.items.map((item: any, idx: number) => {
+        const parsed = parseCmsServiceItem(item);
+        return {
+          id: `cms-service-${idx}`,
+          title: parsed.title,
+          description: parsed.description,
+          icon: getServiceIcon(parsed.title),
+          benefits: parsed.benefits,
+          requirements: SERVICE_LIST[idx % SERVICE_LIST.length]?.requirements || [],
+          steps: SERVICE_LIST[idx % SERVICE_LIST.length]?.steps || []
+        };
+      })
+    : SERVICE_LIST;
+
   return (
     <div className="bg-white">
       {/* Hero Section - Explicitly centered using flex flex-col items-center */}
-      <section className="bg-giat-blue text-white pt-[103px] pb-[103px] md:pt-[95px] md:pb-[95px] relative overflow-hidden">
+      <section 
+        style={{ 
+          backgroundColor: heroBgImageUrl ? undefined : heroBgColor,
+          backgroundImage: heroBgImageUrl ? `url(${heroBgImageUrl})` : undefined,
+          backgroundSize: heroBgImageUrl ? 'cover' : undefined,
+          backgroundPosition: heroBgImageUrl ? 'center' : undefined,
+        }}
+        className="text-white pt-[103px] pb-[103px] md:pt-[95px] md:pb-[95px] relative overflow-hidden"
+      >
         {/* Subtle Background Elements */}
         <div className="absolute inset-0 z-0 opacity-10">
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
@@ -204,7 +311,7 @@ const Services: React.FC = () => {
 
           {/* Large Focused Title */}
           <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tight leading-tight animate-in fade-in slide-in-from-bottom duration-1000 max-w-4xl">
-            Layanan & Produk GIAT
+            {heroHeadline}
           </h1>
 
           {/* Red Underline Accent */}
@@ -212,19 +319,17 @@ const Services: React.FC = () => {
 
           {/* Professional & Complete Subtitle */}
           <p className="text-blue-100/70 max-w-4xl text-lg md:text-xl font-medium leading-relaxed mb-12 px-4 animate-in fade-in slide-in-from-bottom duration-1000 delay-500">
-            Kami menghadirkan ekosistem ekonomi gotong royong melalui akses simpan pinjam yang adil, 
-            pembiayaan modal usaha produktif, tabungan masa depan, serta program pemberdayaan UMKM, 
-            perlindungan asuransi, dan berbagai produk ekonomi kreatif bagi seluruh anggota.
+            {heroSubHeadline}
           </p>
 
           {/* Prominent CTA Button */}
           <div className="animate-in fade-in slide-in-from-bottom duration-1000 delay-700">
             <Link 
-              to="/kontak" 
+              to={heroButtonLink} 
               className="group relative bg-giat-red text-white px-12 py-5 rounded-2xl font-black text-lg flex items-center shadow-2xl shadow-red-500/50 hover:shadow-red-500/70 transition-all duration-300 hover:-translate-y-1.5 active:scale-95"
             >
               <PhoneCall className="mr-3 w-6 h-6 transition-transform group-hover:rotate-12" />
-              <span>Konsultasi Sekarang</span>
+              <span>{heroButtonText}</span>
               <div className="absolute inset-0 rounded-2xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
             </Link>
           </div>
@@ -235,19 +340,19 @@ const Services: React.FC = () => {
       <section className="py-24 bg-white relative z-10">
         <div className="container mx-auto px-4 md:px-8">
           <div className="text-center mb-16 space-y-4">
-            <h2 className="text-giat-red font-bold tracking-widest uppercase text-xs md:text-sm">Portofolio Kami</h2>
-            <h3 className="text-2xl md:text-4xl font-black text-giat-blue">Layanan & Produk Unggulan</h3>
+            <h2 className="text-giat-red font-bold tracking-widest uppercase text-xs md:text-sm">{featuresSubtitle}</h2>
+            <h3 className="text-2xl md:text-4xl font-black text-giat-blue">{featuresTitle}</h3>
             <div className="w-16 h-1 bg-gray-200 mx-auto rounded-full"></div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {SERVICE_LIST.map((service) => (
+            {dynamicServices.map((service) => (
               <div key={service.id} className="group p-8 bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 focus-within:ring-2 focus-within:ring-giat-red/20 outline-none">
                 <div className="mb-6 text-giat-red bg-red-50 w-20 h-20 rounded-2xl flex items-center justify-center group-hover:bg-giat-red group-hover:text-white transition-all duration-300 shadow-sm">
                   {service.icon}
                 </div>
                 <h3 className="text-2xl font-black text-giat-blue mb-4">{service.title}</h3>
-                <p className="text-gray-500 mb-8 leading-relaxed text-sm md:text-base font-medium">
+                <p className="text-gray-500 mb-8 leading-relaxed text-sm md:text-base font-medium font-bold">
                   {service.description}
                 </p>
                 <div className="space-y-3 mb-8">

@@ -1,13 +1,82 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { LATEST_INFO } from '../constants';
 import { Calendar, User, ArrowLeft, Share2, Facebook, Twitter, Link as LinkIcon } from 'lucide-react';
+import { fetchCmsPosts } from '../services/dataService';
+import { CmsPost } from '../types';
+
+// Helper function to format date
+const formatPostDate = (dateStr: string) => {
+  try {
+    const date = new Date(dateStr);
+    const months = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+  } catch (e) {
+    return dateStr;
+  }
+};
+
+// Helper function to normalize CmsPost
+const normalizeCmsPost = (post: CmsPost) => {
+  const contentItem = post.content?.[0];
+  return {
+    id: post.id,
+    title: post.title,
+    date: formatPostDate(post.created_at),
+    category: contentItem?.tags || post.category || "Berita",
+    image: contentItem?.featured_image || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1974&auto=format&fit=crop",
+    excerpt: post.excerpt || contentItem?.excerpt || "",
+    content: contentItem?.body_content || ""
+  };
+};
 
 const InformationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const info = LATEST_INFO.find(item => item.id === Number(id));
+  const [posts, setPosts] = useState<CmsPost[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPosts = async () => {
+      const data = await fetchCmsPosts();
+      if (data) setPosts(data);
+      setLoading(false);
+    };
+    loadPosts();
+  }, []);
+
+  // Find post in static or CMS data
+  const getPost = () => {
+    // Search CMS posts first
+    const cmsPost = posts?.find(p => p.id === Number(id));
+    if (cmsPost) {
+      return normalizeCmsPost(cmsPost);
+    }
+    
+    // Fallback to static info
+    return LATEST_INFO.find(item => item.id === Number(id));
+  };
+
+  const info = getPost();
+
+  if (loading) {
+    return (
+      <div className="h-screen bg-[#020617] flex flex-col items-center justify-center space-y-6">
+        <motion.div 
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+          className="w-16 h-16 border-4 border-t-giat-red border-r-transparent border-b-white border-l-transparent rounded-full shadow-2xl shadow-giat-red/20"
+        />
+        <div className="flex flex-col items-center space-y-1">
+          <span className="text-2xl font-black tracking-tighter text-white">GIAT</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Loading Post...</span>
+        </div>
+      </div>
+    );
+  }
 
   if (!info) {
     return (
@@ -98,9 +167,16 @@ const InformationDetail: React.FC = () => {
             transition={{ delay: 0.3 }}
             className="prose prose-xl prose-slate max-w-none"
           >
-            <p className="text-gray-600 leading-relaxed font-medium text-xl whitespace-pre-wrap">
-              {info.content}
-            </p>
+            {info.content.startsWith('<') ? (
+              <div 
+                className="text-gray-600 leading-relaxed font-medium text-xl prose max-w-none"
+                dangerouslySetInnerHTML={{ __html: info.content }}
+              />
+            ) : (
+              <p className="text-gray-600 leading-relaxed font-medium text-xl whitespace-pre-wrap">
+                {info.content}
+              </p>
+            )}
             
             <div className="mt-16 p-10 bg-gray-50 rounded-[2.5rem] border border-gray-100">
               <h4 className="text-giat-blue font-black text-xl mb-4">Ingin tahu lebih lanjut?</h4>

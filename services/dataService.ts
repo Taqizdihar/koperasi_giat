@@ -1,4 +1,4 @@
-import { CmsPage } from '../types';
+import { CmsPage, CmsPost } from '../types';
 
 /**
  * Service untuk mengambil data dari CMS API Baru Koperasi Giat
@@ -194,6 +194,348 @@ export const MOCK_CMS_PAGES: CmsPage[] = [
     is_in_navbar: 1,
     priority: 1,
     is_contact_form_active: true
+  },
+  {
+    id: 91,
+    tenant_id: 22,
+    title: "Tentang Kami",
+    slug: "tentang-kami",
+    content: [
+      {
+        id: "1779603919912lz2z6e2",
+        type: "hero",
+        data: {
+          headline: "Tentang Kami",
+          sub_headline: "Mengenal lebih dekat visi, misi, dan sejarah panjang Koperasi GIAT dalam melayani anggota dengan penuh integritas.",
+          background_image: "",
+          stats: []
+        }
+      },
+      {
+        id: "1779604124929bviy9o5",
+        type: "rich-text",
+        data: {
+          content: "<p><strong>Sejarah Kami</strong></p><h1><strong>Dua Dekade Mengabdi</strong></h1><p></p><p>Koperasi GIAT didirikan pada tahun 1999 oleh sekelompok profesional yang memiliki visi yang sama untuk memajukan ekonomi kerakyatan melalui sistem gotong royong yang modern.</p><p>Berawal dari hanya 50 anggota pendiri dengan modal swadaya, kini Koperasi GIAT telah tumbuh menjadi salah satu koperasi terbesar di wilayahnya dengan ribuan anggota yang tersebar di berbagai sektor industri.</p><p></p><p><em>Kami terus bertransformasi mengikuti perkembangan teknologi tanpa meninggalkan nilai-nilai dasar kekeluargaan yang telah menjadi pondasi kami selama lebih dari dua dekade.</em></p>"
+        }
+      },
+      {
+        id: "1779604674409c89bddz",
+        type: "features",
+        data: {
+          title: null,
+          subtitle: null,
+          items: [
+            {
+              icon_url: null,
+              title: "Visi Kami",
+              description: "Menjadi lembaga ekonomi kerakyatan terdepan yang profesional, mandiri, dan inklusif untuk mewujudkan kesejahteraan anggota yang berkelanjutan di era digital.",
+              link_url: null
+            },
+            {
+              icon_url: null,
+              title: "Misi Kami",
+              description: "Menyelenggarakan unit usaha simpan pinjam yang aman dan transparan. Mengembangkan kemitraan strategis untuk memperluas manfaat ekonomi anggota. Meningkatkan literasi keuangan dan digital bagi seluruh anggota. Membangun ekosistem bisnis yang inovatif dan berorientasi pada hasil. ",
+              link_url: null
+            }
+          ]
+        }
+      },
+      {
+        id: "1779604705341d0pvewo",
+        type: "features",
+        data: {
+          title: "Nilai-Nilai Koperasi GIAT",
+          subtitle: "Prinsip Kami",
+          items: [
+            {
+              icon_url: null,
+              title: "Integritas",
+              description: "Bekerja dengan jujur, transparan, dan menjunjung tinggi kode etik profesional dalam setiap transaksi.",
+              link_url: null
+            },
+            {
+              icon_url: null,
+              title: "Kekeluargaan",
+              description: "Membangun hubungan erat antar anggota dan pengurus layaknya keluarga besar yang saling mendukung.",
+              link_url: null
+            },
+            {
+              icon_url: null,
+              title: "Transparansi",
+              description: "Keterbukaan informasi dan laporan keuangan yang akurat serta dapat diakses oleh seluruh anggota.",
+              link_url: null
+            }
+          ]
+        }
+      },
+      {
+        id: "1779605135256jg2ddc4",
+        type: "rich-text",
+        data: {
+          content: "<p><strong>Tim Kami</strong></p><h1><strong>Struktur Organisasi</strong></h1><p><strong>Dikelola oleh tenaga profesional dan berpengalaman untuk menjamin tata kelola koperasi yang baik dan berkelanjutan.</strong></p><p></p>"
+        }
+      },
+      {
+        id: "177960528110533v770c",
+        type: "team",
+        data: {
+          title: "Dewan Pengawas",
+          subtitle: null,
+          members: [
+            {
+              name: "Dr. Ir. Ahmad Sudrajat",
+              role: "Ketua Pengawas",
+              photo_url: null,
+              bio: null,
+              social_links: null
+            },
+            {
+              name: "Siti Aminah, M.Ak",
+              role: "Anggota Pengawas",
+              photo_url: null,
+              bio: null,
+              social_links: null
+            }
+          ]
+        }
+      },
+      {
+        id: "1779605337571bdve2iq",
+        type: "team",
+        data: {
+          title: "Pengurus Koperasi",
+          subtitle: null,
+          members: [
+            {
+              name: "H. Bambang Irawan",
+              role: "Ketua Koperasi",
+              photo_url: null,
+              bio: null,
+              social_links: null
+            },
+            {
+              name: "Dra. Elly Risman",
+              role: "Bendahara",
+              photo_url: null,
+              bio: null,
+              social_links: null
+            },
+            {
+              name: "Budi Santoso, S.T",
+              role: "Sekretaris",
+              photo_url: null,
+              bio: null,
+              social_links: null
+            }
+          ]
+        }
+      },
+      {
+        id: "17796053935715phaqus",
+        type: "team",
+        data: {
+          title: "Manajemen Operasional",
+          subtitle: null,
+          members: [
+            {
+              name: "Rizky Ramadhan, MBA",
+              role: "Manager Koperasi",
+              photo_url: null,
+              bio: null,
+              social_links: null
+            }
+          ]
+        }
+      },
+      {
+        id: "177960545198979tbkvb",
+        type: "cta-banner",
+        data: {
+          headline: "Mari Tumbuh Bersama Kami",
+          sub_headline: "Bergabunglah dengan ribuan anggota lainnya dan rasakan manfaat nyata dari ekonomi gotong royong yang modern.",
+          button_text: "Mulai Bergabung Sekarang",
+          button_link: null,
+          background_image_url: null,
+          background_color: "#163C8F"
+        }
+      }
+    ],
+    status: "published",
+    author_id: null,
+    created_at: "2026-05-24T06:22:13.000Z",
+    updated_at: "2026-05-24T06:53:35.000Z",
+    is_in_navbar: 1,
+    priority: 2,
+    is_contact_form_active: true
+  },
+  {
+    id: 92,
+    tenant_id: 22,
+    title: "Informasi",
+    slug: "informasi",
+    content: [
+      {
+        id: "17796066560596e2ynqb",
+        type: "rich-text",
+        data: {
+          content: "<p><strong>Pusat Informasi</strong></p><h1><strong>Info GIAT</strong></h1><p><strong>Kumpulan berita terbaru, inovasi layanan, dan pembaruan strategis dari ekosistem Koperasi GIAT.</strong></p>"
+        }
+      },
+      {
+        id: "1779606669108de5f8ra",
+        type: "dynamic-post-feed",
+        data: {
+          category: null,
+          limit: 6,
+          sort_order: "desc",
+          selection_mode: "dynamic",
+          selected_post_ids: null
+        }
+      },
+      {
+        id: "1779606677608uetzro4",
+        type: "dynamic-post-feed",
+        data: {
+          category: null,
+          limit: 3,
+          sort_order: "desc",
+          selection_mode: "manual",
+          selected_post_ids: [
+            123
+          ]
+        }
+      },
+      {
+        id: "17796075540365ks14m8",
+        type: "cta-banner",
+        data: {
+          headline: "Ingin tahu lebih lanjut?",
+          sub_headline: "Hubungi layanan bantuan kami untuk mendapatkan informasi mendalam mengenai program-program Koperasi GIAT.",
+          button_text: "Hubungi Kami",
+          button_link: null,
+          background_image_url: null,
+          background_color: "#F9FAFB"
+        }
+      }
+    ],
+    status: "published",
+    author_id: null,
+    created_at: "2026-05-24T07:11:59.000Z",
+    updated_at: "2026-05-24T07:27:03.000Z",
+    is_in_navbar: 1,
+    priority: 3,
+    is_contact_form_active: true
+  },
+  {
+    id: 93,
+    tenant_id: 22,
+    title: "Kontak",
+    slug: "kontak",
+    content: [
+      {
+        id: "1779607672283crz1agv",
+        type: "hero",
+        data: {
+          headline: "Kontak Kami",
+          sub_headline: "Kami siap melayani dan menjawab setiap pertanyaan Anda tentang Koperasi GIAT dengan sepenuh hati.",
+          background_image: "",
+          stats: []
+        }
+      },
+      {
+        id: "177960772386873eti1m",
+        type: "contacts",
+        data: {
+          title: "Informasi Kontak",
+          phone_numbers: [
+            "+62 812 3456 7890"
+          ],
+          emails: [
+            "info@koperasigiat.co.id"
+          ],
+          addresses: [
+            "Jl. Telekomunikasi No.1, Terusan, Kec. Buahbatu, Kabupaten Bandung, Jawa Barat 40257"
+          ],
+          map_location_url: "https://maps.app.goo.gl/iiTW4j6tM33NAkpj9",
+          social_links: [],
+          working_hours: "Senin - Jumat : 08.00-16.30"
+        }
+      }
+    ],
+    status: "published",
+    author_id: null,
+    created_at: "2026-05-24T07:29:49.000Z",
+    updated_at: "2026-05-24T07:36:57.000Z",
+    is_in_navbar: 1,
+    priority: 4,
+    is_contact_form_active: true
+  },
+  {
+    id: 94,
+    tenant_id: 22,
+    title: "Layanan & Produk",
+    slug: "layanan-produk",
+    content: [
+      {
+        id: "1779610119626rvlj065",
+        type: "cta-banner",
+        data: {
+          headline: "Layanan & Produk GIAT",
+          sub_headline: "Kami menghadirkan ekosistem ekonomi gotong royong melalui akses simpan pinjam yang adil, pembiayaan modal usaha produktif, tabungan masa depan, serta program pemberdayaan UMKM, perlindungan asuransi, dan berbagai produk ekonomi kreatif bagi seluruh anggota.",
+          button_text: "Konsultasi Sekarang",
+          button_link: null,
+          background_image_url: null,
+          background_color: "#153B8F"
+        }
+      },
+      {
+        id: "17796102322039drkjo9",
+        type: "features",
+        data: {
+          title: "Layanan & Produk Unggulan",
+          subtitle: "Portofolio Kami",
+          items: [
+            {
+              icon_url: null,
+              title: "Simpan Pinjam",
+              description: "Solusi keuangan aman dan terpercaya dengan bunga kompetitif untuk kesejahteraan anggota.\n\nBunga menurun yang ringan\nProses pencairan maksimal 2 hari kerja",
+              link_url: null
+            },
+            {
+              icon_url: null,
+              title: "Pengadaan",
+              description: "Layanan pengadaan barang dan jasa untuk kebutuhan operasional dan proyek mitra kerja.\n\nHarga kompetitif & transparan\nKualitas barang terjamin",
+              link_url: null
+            },
+            {
+              icon_url: null,
+              title: "Ritel ",
+              description: "Pengelolaan unit usaha dagang dan toko untuk menyediakan kebutuhan harian civitas akademika.\n\nLokasi strategis di area kampus\nHarga khusus untuk anggota GIAT\n",
+              link_url: null
+            },
+            {
+              icon_url: null,
+              title: "Marketplace",
+              description: "Platform jual beli antar anggota untuk memperluas jangkauan pasar produk kreatif anggota.\n\nAkses ke ribuan pembeli potensial\nSistem pembayaran aman",
+              link_url: null
+            },
+            {
+              icon_url: null,
+              title: "Fotocopy ATK",
+              description: "Layanan penggandaan dokumen dan penyediaan alat tulis kantor kualitas terbaik.\n\nHasil cetak tajam & bersih\nHarga pelajar & mahasiswa",
+              link_url: null
+            }
+          ]
+        }
+      }
+    ],
+    status: "published",
+    author_id: null,
+    created_at: "2026-05-24T08:09:46.000Z",
+    updated_at: "2026-05-24T08:15:32.000Z",
+    is_in_navbar: 1,
+    priority: 3,
+    is_contact_form_active: true
   }
 ];
 
@@ -235,6 +577,94 @@ export const fetchCmsPages = async (forceRefresh = false): Promise<CmsPage[] | n
     console.error("[CMS] API Error, falling back to mock data:", error);
     cachedPages = MOCK_CMS_PAGES;
     return MOCK_CMS_PAGES;
+  }
+};
+
+export const MOCK_CMS_POSTS: CmsPost[] = [
+  {
+    "id": 124,
+    "tenant_id": 22,
+    "title": "Peluncuran Fitur eKop GIAT Mobile",
+    "slug": "peluncuran-fitur-ekop-giat-mobile",
+    "category": "Artikel",
+    "excerpt": "Kini akses simpan pinjam lebih mudah menggunakan smartphone Anda.",
+    "content": [
+      {
+        "excerpt": "Kini akses simpan pinjam lebih mudah menggunakan smartphone Anda.",
+        "featured_image": null,
+        "body_content": "<p>Setelah melalui tahap pengembangan intensif selama enam bulan, eKop GIAT Mobile resmi diluncurkan hari ini. Aplikasi ini dirancang untuk memberikan kemudahan bagi anggota dalam memantau saldo simpanan, mengajukan pinjaman darurat, hingga melakukan transaksi pembayaran rutin secara instan. Dengan fitur keamanan biometrik, autentikasi dua faktor, dan enkripsi tingkat tinggi, kami menjamin keamanan data finansial seluruh anggota tetap terjaga dari ancaman siber. Aplikasi ini juga memungkinkan anggota untuk melakukan transfer antar rekening koperasi tanpa biaya admin, yang merupakan salah satu keuntungan eksklusif bagi pemegang akun aktif. Kami terus berkomitmen untuk memperbarui aplikasi ini dengan fitur-fitur baru setiap bulannya berdasarkan masukan dari para pengguna. Saat ini, versi Android dan iOS sudah tersedia untuk diunduh di Google Play Store dan Apple App Store. Mari rasakan kemudahan bertransaksi di era ekonomi digital bersama GIAT.</p>",
+        "tags": "Inovasi"
+      }
+    ],
+    "featured_image_id": null,
+    "status": "published",
+    "author_id": null,
+    "published_at": null,
+    "created_at": "2026-05-24T07:17:18.000Z",
+    "updated_at": "2026-05-24T07:17:18.000Z"
+  },
+  {
+    "id": 123,
+    "tenant_id": 22,
+    "title": "Rapat Anggota Tahunan (RAT) 2026",
+    "slug": "rapat-anggota-tahunan-rat-2026",
+    "category": "Artikel",
+    "excerpt": "Undangan resmi bagi seluruh anggota untuk menghadiri musyawarah tertinggi koperasi...",
+    "content": [
+      {
+        "excerpt": "Undangan resmi bagi seluruh anggota untuk menghadiri musyawarah tertinggi koperasi...",
+        "featured_image": "https://drive.google.com/thumbnail?id=1w5y6SCI6QCLHbnxy-B5vvMurKzCaUNrp&sz=w1200",
+        "body_content": "<p>Rapat Anggota Tahunan (RAT) 2026 Koperasi GIAT akan diselenggarakan pada akhir bulan ini. Acara ini merupakan momen krusial bagi seluruh anggota untuk berpartisipasi dalam menentukan arah strategis koperasi untuk satu tahun ke depan. Agenda utama meliputi laporan pertanggungjawaban pengurus, rencana kerja tahun buku berjalan, serta pembagian Sisa Hasil Usaha (SHU). Kami mengundang kehadiran fisik maupun virtual demi terciptanya transparansi dan akuntabilitas. Dalam rapat tahun ini, kami juga akan memperkenalkan beberapa program baru yang fokus pada digitalisasi dan pemberdayaan komunitas hijau. Penting bagi setiap anggota untuk memahami bahwa suara Anda menentukan masa depan koperasi kita bersama. Selain itu, rapat kali ini akan memberikan penghargaan khusus bagi anggota paling aktif selama setahun terakhir sebagai bentuk apresiasi kami terhadap loyalitas Anda. Pastikan Anda telah terdaftar melalui aplikasi eKop untuk mendapatkan link akses zoom bagi yang hadir secara virtual.</p>",
+        "tags": "Berita"
+      }
+    ],
+    "featured_image_id": null,
+    "status": "published",
+    "author_id": null,
+    "published_at": null,
+    "created_at": "2026-05-24T07:10:33.000Z",
+    "updated_at": "2026-05-24T07:18:12.000Z"
+  }
+];
+
+let cachedPosts: CmsPost[] | null = null;
+
+export const fetchCmsPosts = async (forceRefresh = false): Promise<CmsPost[] | null> => {
+  if (cachedPosts && !forceRefresh) {
+    return cachedPosts;
+  }
+
+  const { url, key } = getApiConfig();
+  const postsUrl = url.replace(/\/pages$/, '/posts').replace(/\/pages\/$/, '/posts');
+
+  try {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${key}`,
+      'x-api-key': key
+    };
+
+    const fetchUrl = postsUrl.includes('?') ? `${postsUrl}&_t=${Date.now()}` : `${postsUrl}?_t=${Date.now()}`;
+    console.log(`[CMS] Fetching posts from: ${fetchUrl}`);
+
+    const response = await fetch(fetchUrl, {
+      method: 'GET',
+      headers: headers,
+      cache: 'no-store'
+    });
+
+    if (!response.ok) {
+      throw new Error(`Gagal mengambil data CMS posts: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('[CMS] Fetch posts success, received posts:', data);
+    cachedPosts = data;
+    return data;
+  } catch (error) {
+    console.error("[CMS] Posts API Error, falling back to mock data:", error);
+    cachedPosts = MOCK_CMS_POSTS;
+    return MOCK_CMS_POSTS;
   }
 };
 

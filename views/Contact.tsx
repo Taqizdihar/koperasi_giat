@@ -21,10 +21,43 @@ const Contact: React.FC = () => {
   const contactPage = pages?.find(p => p.slug === 'kontak') || pages?.find(p => p.slug === 'koperasi-giat') || pages?.[0];
   const isFormActive = contactPage ? contactPage.is_contact_form_active : true;
 
+  const heroBlock = contactPage?.content?.find((block: any) => block.type === 'hero');
+  const contactsBlock = contactPage?.content?.find((block: any) => block.type === 'contacts');
+
+  const heroHeadline = heroBlock?.data?.headline || "Kontak Kami";
+  const heroSubHeadline = heroBlock?.data?.sub_headline || "Kami siap melayani dan menjawab setiap pertanyaan Anda tentang Koperasi GIAT dengan sepenuh hati.";
+  const heroBgImage = heroBlock?.data?.background_image || "";
+
+  const contactTitle = contactsBlock?.data?.title || "Informasi Kontak";
+  const addressesList = contactsBlock?.data?.addresses && contactsBlock.data.addresses.length > 0
+    ? contactsBlock.data.addresses
+    : ["Jl. Ekonomi Makmur No. 88, Tebet, Jakarta Selatan, 12810"];
+  
+  const phoneNumbersList = contactsBlock?.data?.phone_numbers && contactsBlock.data.phone_numbers.length > 0
+    ? contactsBlock.data.phone_numbers
+    : ["(021) 1234-5678 / +62 812 3456 7890"];
+
+  const emailsList = contactsBlock?.data?.emails && contactsBlock.data.emails.length > 0
+    ? contactsBlock.data.emails
+    : ["info@koperasigiat.co.id"];
+
+  const workingHours = contactsBlock?.data?.working_hours || "Senin - Jumat: 08:00 - 17:00 WIB\nSabtu: 08:00 - 12:00 WIB";
+  const mapLocationUrl = contactsBlock?.data?.map_location_url || "https://maps.app.goo.gl/iiTW4j6tM33NAkpj9";
+
   return (
     <div>
       {/* Hero Section - Redesigned to be flush with Navbar */}
-      <section className="bg-giat-blue pt-32 pb-20 md:pt-44 md:pb-32 text-white relative overflow-hidden">
+      <section className={`relative pt-32 pb-20 md:pt-44 md:pb-32 text-white overflow-hidden ${heroBgImage ? 'bg-black' : 'bg-giat-blue'}`}>
+        {heroBgImage && (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent z-10" />
+            <img 
+              src={heroBgImage} 
+              alt={heroHeadline} 
+              className="absolute inset-0 w-full h-full object-cover brightness-50 z-0"
+            />
+          </>
+        )}
         {/* Background Patterns */}
         <div className="absolute inset-0 z-0 opacity-10">
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
@@ -32,9 +65,9 @@ const Contact: React.FC = () => {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] -mr-64 -mt-64"></div>
 
         <div className="container mx-auto px-4 text-center relative z-10">
-          <h1 className="text-3xl md:text-5xl font-black mb-6">Kontak Kami</h1>
+          <h1 className="text-3xl md:text-5xl font-black mb-6">{heroHeadline}</h1>
           <p className="text-blue-100/70 max-w-2xl mx-auto text-lg md:text-xl font-medium">
-            Kami siap melayani dan menjawab setiap pertanyaan Anda tentang Koperasi GIAT dengan sepenuh hati.
+            {heroSubHeadline}
           </p>
         </div>
       </section>
@@ -44,7 +77,7 @@ const Contact: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             <div className="space-y-12">
               <div className="space-y-6">
-                <h2 className="text-3xl font-bold text-giat-blue">Informasi Kontak</h2>
+                <h2 className="text-3xl font-bold text-giat-blue">{contactTitle}</h2>
                 <p className="text-gray-600">Silakan kunjungi kantor kami atau hubungi kami melalui saluran berikut.</p>
               </div>
 
@@ -53,28 +86,34 @@ const Contact: React.FC = () => {
                   <div className="bg-red-50 p-4 rounded-xl text-giat-red shadow-sm"><MapPin /></div>
                   <div>
                     <h4 className="font-bold text-lg mb-1 text-giat-blue">Alamat Kantor</h4>
-                    <p className="text-gray-500">Jl. Ekonomi Makmur No. 88, Tebet, Jakarta Selatan, 12810</p>
+                    {addressesList.map((addr: string, i: number) => (
+                      <p key={i} className="text-gray-500">{addr}</p>
+                    ))}
                   </div>
                 </div>
                 <div className="flex items-start space-x-6">
                   <div className="bg-blue-50 p-4 rounded-xl text-giat-blue shadow-sm"><Phone /></div>
                   <div>
                     <h4 className="font-bold text-lg mb-1 text-giat-blue">Telepon / WA</h4>
-                    <p className="text-gray-500">(021) 1234-5678 / +62 812 3456 7890</p>
+                    {phoneNumbersList.map((phone: string, i: number) => (
+                      <p key={i} className="text-gray-500">{phone}</p>
+                    ))}
                   </div>
                 </div>
                 <div className="flex items-start space-x-6">
                   <div className="bg-red-50 p-4 rounded-xl text-giat-red shadow-sm"><Mail /></div>
                   <div>
                     <h4 className="font-bold text-lg mb-1 text-giat-blue">Email</h4>
-                    <p className="text-gray-500">info@koperasigiat.co.id</p>
+                    {emailsList.map((email: string, i: number) => (
+                      <p key={i} className="text-gray-500">{email}</p>
+                    ))}
                   </div>
                 </div>
                 <div className="flex items-start space-x-6">
                   <div className="bg-blue-50 p-4 rounded-xl text-giat-blue shadow-sm"><Clock /></div>
                   <div>
                     <h4 className="font-bold text-lg mb-1 text-giat-blue">Jam Operasional</h4>
-                    <p className="text-gray-500 font-medium">Senin - Jumat: 08:00 - 17:00 WIB<br />Sabtu: 08:00 - 12:00 WIB</p>
+                    <p className="text-gray-500 font-medium whitespace-pre-line">{workingHours}</p>
                   </div>
                 </div>
               </div>
@@ -200,15 +239,16 @@ const Contact: React.FC = () => {
       </section>
 
       {/* Map Placeholder */}
-      <section className="h-[450px] bg-gray-200 relative">
-        <div className="absolute inset-0 flex items-center justify-center text-gray-500 z-10">
-          <div className="text-center bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl">
+      <section className="h-[450px] bg-gray-200 relative group overflow-hidden">
+        <a href={mapLocationUrl} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-20 flex items-center justify-center">
+          <div className="text-center bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl hover:scale-105 transition-transform duration-500">
             <MapPin size={48} className="mx-auto mb-4 text-giat-red" />
             <p className="font-bold text-giat-blue text-lg">Lokasi Kantor Pusat</p>
-            <p className="text-sm font-medium">Koperasi GIAT - Tebet, Jakarta Selatan</p>
+            <p className="text-sm font-medium">{addressesList[0]}</p>
+            <span className="text-[10px] text-giat-red font-black uppercase tracking-widest mt-2 block">Buka di Google Maps →</span>
           </div>
-        </div>
-        <img src="https://picsum.photos/id/164/1920/600" alt="Map Location" className="w-full h-full object-cover opacity-60 grayscale" />
+        </a>
+        <img src="https://picsum.photos/id/164/1920/600" alt="Map Location" className="w-full h-full object-cover opacity-60 grayscale group-hover:scale-105 transition-transform duration-1000" />
       </section>
     </div>
   );

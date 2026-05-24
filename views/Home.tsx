@@ -355,10 +355,10 @@ const Home: React.FC = () => {
   // Build slides from CMS hero blocks (excluding the app hero block)
   const slides = sliderHeroBlocks.length > 0 ? sliderHeroBlocks.map((block: PageBlock, idx: number) => ({
     id: idx + 1,
-    title: block.data.headline || "Unit Usaha Produktif",
+    title: block.data?.headline || "Unit Usaha Produktif",
     subtitle: homePage?.title || "Koperasi Pilihan Rakyat",
-    description: block.data.sub_headline || "Kami mengembangkan berbagai unit bisnis kreatif untuk menciptakan nilai tambah dan bagi hasil yang maksimal bagi anggota.",
-    image: block.data.background_image || HERO_SLIDES[idx % HERO_SLIDES.length].image,
+    description: block.data?.sub_headline || "Kami mengembangkan berbagai unit bisnis kreatif untuk menciptakan nilai tambah dan bagi hasil yang maksimal bagi anggota.",
+    image: block.data?.background_image || HERO_SLIDES[idx % HERO_SLIDES.length].image,
     cta: "Akses eKop GIAT App",
     link: "https://ekop.kopgiat.id/"
   })) : HERO_SLIDES;

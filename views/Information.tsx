@@ -1,17 +1,188 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { LATEST_INFO } from '../constants';
 import { Search, Filter, Calendar, User, ArrowRight } from 'lucide-react';
+import { fetchCmsPages, fetchCmsPosts } from '../services/dataService';
+import { CmsPage, CmsPost, PageBlock } from '../types';
+
+// Helper function to format created_at date into Indonesian format
+const formatPostDate = (dateStr: string) => {
+  try {
+    const date = new Date(dateStr);
+    const months = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+  } catch (e) {
+    return dateStr;
+  }
+};
+
+// Helper function to normalize CmsPost into UI expected format
+const normalizeCmsPost = (post: CmsPost) => {
+  const contentItem = post.content?.[0];
+  return {
+    id: post.id,
+    title: post.title,
+    date: formatPostDate(post.created_at),
+    category: contentItem?.tags || post.category || "Berita",
+    image: contentItem?.featured_image || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1974&auto=format&fit=crop",
+    excerpt: post.excerpt || contentItem?.excerpt || "",
+    content: contentItem?.body_content || ""
+  };
+};
+
+// Helper function to parse rich text content for Information Header Section
+const parseInfoRichText = (htmlContent: string) => {
+  if (!htmlContent) return null;
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, 'text/html');
+    
+    const subtitle = doc.querySelector('p strong')?.textContent || 'Pusat Informasi';
+    const title = doc.querySelector('h1')?.textContent || 'Info GIAT';
+    
+    // Find description paragraph
+    const pElements = Array.from(doc.querySelectorAll('p'));
+    let description = 'Kumpulan berita terbaru, inovasi layanan, dan pembaruan strategis dari ekosistem Koperasi GIAT.';
+    
+    pElements.forEach((p, idx) => {
+      if (idx > 0 && p.textContent?.trim() && !p.querySelector('strong')) {
+        description = p.textContent.trim();
+      } else if (idx > 0 && p.querySelector('strong')?.textContent?.trim()) {
+        description = p.querySelector('strong')?.textContent?.trim() || description;
+      }
+    });
+    
+    return { subtitle, title, description };
+  } catch (e) {
+    return {
+      subtitle: 'Pusat Informasi',
+      title: 'Info GIAT',
+      description: 'Kumpulan berita terbaru, inovasi layanan, dan pembaruan strategis dari ekosistem Koperasi GIAT.'
+    };
+  }
+};
 
 const Information: React.FC = () => {
-  const [visibleCount, setVisibleCount] = useState(4);
+  const [pages, setPages] = useState<CmsPage[] | null>(null);
+  const [posts, setPosts] = useState<CmsPost[] | null>(null);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [visibleCount, setVisibleCount] = useState(4);
 
-  const filteredInfo = LATEST_INFO.filter(info => 
-    info.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    info.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
+  useEffect(() => {
+    const loadData = async () => {
+      const [pagesData, postsData] = await Promise.all([
+        fetchCmsPages(),
+        fetchCmsPosts()
+      ]);
+      if (pagesData) setPages(pagesData);
+      if (postsData) setPosts(postsData);
+      setLoading(false);
+    };
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="h-screen bg-[#020617] flex flex-col items-center justify-center space-y-6">
+        <motion.div 
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+          className="w-16 h-16 border-4 border-t-giat-red border-r-transparent border-b-white border-l-transparent rounded-full shadow-2xl shadow-giat-red/20"
+        />
+        <div className="flex flex-col items-center space-y-1">
+          <span className="text-2xl font-black tracking-tighter text-white">GIAT</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Loading CMS...</span>
+        </div>
+      </div>
+    );
+  }
+
+  const infoPagesArray = pages && Array.isArray(pages) ? pages : [];
+  const infoPage = infoPagesArray.find(p => p && p.slug === 'informasi') || infoPagesArray[0];
+  const richTextBlock = infoPage?.content?.find((block: PageBlock) => block && block.type === 'rich-text');
+  const feedBlocks = infoPage?.content?.filter((block: PageBlock) => block && block.type === 'dynamic-post-feed') || [];
+  const ctaBlock = infoPage?.content?.find((block: PageBlock) => block && block.type === 'cta-banner');
+
+  const parsedHeader = richTextBlock?.data?.content ? parseInfoRichText(richTextBlock.data.content) : null;
+  const headerSubtitle = parsedHeader?.subtitle || "Pusat Informasi";
+  const headerTitle = parsedHeader?.title || "Info GIAT";
+  const headerDesc = parsedHeader?.description || "Kumpulan berita terbaru, inovasi layanan, dan pembaruan strategis dari ekosistem Koperasi GIAT.";
+
+  // Safe CTA block values
+  const ctaHeadline = ctaBlock?.data?.headline || "Ingin tahu lebih lanjut?";
+  const ctaSubHeadline = ctaBlock?.data?.sub_headline || "Hubungi layanan bantuan kami untuk mendapatkan informasi mendalam mengenai program-program Koperasi GIAT.";
+  const ctaButtonText = ctaBlock?.data?.button_text || "Hubungi Kami";
+  const ctaButtonLink = ctaBlock?.data?.button_link || "/kontak";
+  const ctaBgColor = ctaBlock?.data?.background_color || '#F9FAFB';
+  const ctaBgImageUrl = ctaBlock?.data?.background_image_url || null;
+
+  // Filter and pool posts based on all dynamic-post-feed blocks
+  const getCmsPostsPool = () => {
+    // Normalize static fallback posts
+    const staticPosts = LATEST_INFO.map(p => ({
+      ...p,
+      content: p.content // ensure standard format
+    }));
+
+    // Normalize CMS fetched posts
+    const cmsPosts = posts && Array.isArray(posts) 
+      ? posts.filter(p => p && p.id).map(normalizeCmsPost) 
+      : [];
+
+    // Combine them in a Map to avoid duplicates by ID (CMS overwrites static ones if they share ID)
+    const allPostsMap = new Map<number, any>();
+    staticPosts.forEach(p => allPostsMap.set(p.id, p));
+    cmsPosts.forEach(p => allPostsMap.set(p.id, p));
+
+    const allUnifiedPosts = Array.from(allPostsMap.values());
+
+    if (feedBlocks.length === 0) {
+      return allUnifiedPosts;
+    }
+
+    const matchedPostsMap = new Map<number, any>();
+    
+    feedBlocks.forEach(block => {
+      if (!block || !block.data) return;
+      let postsList = [...allUnifiedPosts];
+      const { category, limit, sort_order, selection_mode, selected_post_ids } = block.data || {};
+      
+      if (selection_mode === 'manual' && Array.isArray(selected_post_ids) && selected_post_ids.length > 0) {
+        postsList = postsList.filter(post => post && selected_post_ids.map(id => Number(id)).includes(Number(post.id)));
+      } else {
+        if (category && category !== 'Semua Kategori' && category !== 'All') {
+          postsList = postsList.filter(post => post && post.category && post.category.toLowerCase() === category.toLowerCase());
+        }
+      }
+      
+      if (sort_order === 'asc') {
+        postsList = postsList.reverse();
+      }
+      
+      const maxLimit = typeof limit === 'number' ? limit : parseInt(limit) || 6;
+      postsList.slice(0, maxLimit).forEach(post => {
+        if (post && post.id) {
+          matchedPostsMap.set(post.id, post);
+        }
+      });
+    });
+    
+    return Array.from(matchedPostsMap.values());
+  };
+
+  const basePosts = getCmsPostsPool();
+
+  const filteredInfo = basePosts.filter(info => 
+    info && info.title && (
+      info.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (info.excerpt && info.excerpt.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
   );
 
   const displayedInfo = filteredInfo.slice(0, visibleCount);
@@ -31,7 +202,7 @@ const Information: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-giat-red font-black tracking-[0.2em] uppercase text-sm block"
           >
-            Pusat Informasi
+            {headerSubtitle}
           </motion.span>
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
@@ -39,10 +210,10 @@ const Information: React.FC = () => {
             transition={{ delay: 0.1 }}
             className="text-4xl md:text-6xl font-black text-giat-blue leading-tight"
           >
-            Info GIAT
+            {headerTitle}
           </motion.h1>
           <p className="text-gray-500 text-xl font-bold leading-relaxed max-w-2xl">
-            Kumpulan berita terbaru, inovasi layanan, dan pembaruan strategis dari ekosistem Koperasi GIAT.
+            {headerDesc}
           </p>
         </div>
 
@@ -137,6 +308,40 @@ const Information: React.FC = () => {
         {filteredInfo.length === 0 && (
           <div className="py-24 text-center">
             <p className="text-gray-500 font-bold text-xl">Tidak ada informasi yang sesuai dengan pencarian Anda.</p>
+          </div>
+        )}
+
+        {/* CTA Banner from CMS */}
+        {ctaBlock && (
+          <div className="mt-24 max-w-5xl mx-auto">
+            <div 
+              style={{ 
+                backgroundColor: ctaBgImageUrl ? undefined : ctaBgColor,
+                backgroundImage: ctaBgImageUrl ? `url(${ctaBgImageUrl})` : undefined,
+                backgroundSize: ctaBgImageUrl ? 'cover' : undefined,
+                backgroundPosition: ctaBgImageUrl ? 'center' : undefined,
+              }}
+              className="rounded-[3rem] p-12 md:p-16 text-center border border-gray-100 shadow-sm relative overflow-hidden group"
+            >
+              <div className="relative z-10 space-y-6">
+                <h3 className="text-3xl md:text-4xl font-black text-giat-blue">
+                  {ctaHeadline}
+                </h3>
+                <p className="text-gray-500 text-lg font-bold max-w-2xl mx-auto leading-relaxed">
+                  {ctaSubHeadline}
+                </p>
+                <div className="pt-4">
+                  <Link 
+                    to={ctaButtonLink}
+                    className="inline-flex bg-giat-red text-white px-10 py-5 rounded-2xl font-black hover:bg-red-700 transition-all shadow-lg shadow-red-500/20 hover:-translate-y-1"
+                  >
+                    {ctaButtonText}
+                  </Link>
+                </div>
+              </div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-giat-red/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-giat-blue/5 rounded-full blur-2xl -ml-10 -mb-10"></div>
+            </div>
           </div>
         )}
       </div>
