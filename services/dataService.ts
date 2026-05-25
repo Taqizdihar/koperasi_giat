@@ -1,4 +1,4 @@
-import { CmsPage, CmsPost } from '../types';
+import { CmsPage, CmsPost, CmsSettings } from '../types';
 
 /**
  * Service untuk mengambil data dari CMS API Baru Koperasi Giat
@@ -665,6 +665,128 @@ export const fetchCmsPosts = async (forceRefresh = false): Promise<CmsPost[] | n
     console.error("[CMS] Posts API Error, falling back to mock data:", error);
     cachedPosts = MOCK_CMS_POSTS;
     return MOCK_CMS_POSTS;
+  }
+};
+
+export const MOCK_CMS_SETTINGS: CmsSettings = {
+  "site_name": "GIAT KOPERASI",
+  "title": "GIAT KOPERASI",
+  "tagline": "Membangun masa depan ekonomi Indonesia melalui inovasi koperasi digital yang inklusif dan berkelanjutan",
+  "logo_url": "https://drive.google.com/thumbnail?id=19ubHZKwf8rH43uqb5QXHC1KCv2_GeU-Z&sz=w1200",
+  "frontend_url": "",
+  "support_email": "giatsejahterabersama@gmail.com",
+  "copyright_text": "© 2026 Koperasi GIAT. Established 1999.",
+  "footer_text": "Membangun masa depan ekonomi Indonesia melalui inovasi koperasi digital yang inklusif dan berkelanjutan.",
+  "social_links": [
+    {
+      "icon": "instagram",
+      "url": "https://www.instagram.com/giatsejahterabersama/?hl=en"
+    },
+    {
+      "icon": "tiktok",
+      "url": ""
+    },
+    {
+      "icon": "linkedin",
+      "url": ""
+    }
+  ],
+  "footer_nav_1": [
+    {
+      "label": "Beranda",
+      "url": ""
+    },
+    {
+      "label": "Tentang Kami",
+      "url": ""
+    },
+    {
+      "label": "Layanan & Produk",
+      "url": ""
+    },
+    {
+      "label": "Informasi",
+      "url": ""
+    },
+    {
+      "label": "Kontak",
+      "url": ""
+    }
+  ],
+  "footer_nav_2": [
+    {
+      "label": "Syarat & Ketentuan",
+      "url": ""
+    },
+    {
+      "label": "Kebijakan Privasi",
+      "url": ""
+    },
+    {
+      "label": "Laporan Tahunan",
+      "url": ""
+    },
+    {
+      "label": "Tata Kelola",
+      "url": ""
+    }
+  ],
+  "footer_contacts": [
+    {
+      "label": "Alamat",
+      "value": "Jl. Telekomunikasi No.1, Terusan, Kec. Buahbatu, Kabupaten Bandung, Jawa Barat 40257"
+    },
+    {
+      "label": "No.Telp",
+      "value": "08132427678"
+    },
+    {
+      "label": "Email",
+      "value": "giatsejahterabersama@gmail.com"
+    }
+  ],
+  "google_maps_url": "Jl. Telekomunikasi No.1, Terusan, Kec. Buahbatu, Kabupaten Bandung, Jawa Barat 40257"
+};
+
+let cachedSettings: CmsSettings | null = null;
+
+export const fetchCmsSettings = async (forceRefresh = false): Promise<CmsSettings> => {
+  if (cachedSettings && !forceRefresh) {
+    return cachedSettings;
+  }
+
+  const { url, key } = getApiConfig();
+  // Replace the dynamic endpoint suffix (e.g. /pages or /pages/ with /settings)
+  const settingsUrl = url.replace(/\/pages$/, '/settings').replace(/\/pages\/$/, '/settings');
+
+  try {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${key}`,
+      'x-api-key': key
+    };
+
+    const fetchUrl = settingsUrl.includes('?') ? `${settingsUrl}&_t=${Date.now()}` : `${settingsUrl}?_t=${Date.now()}`;
+    console.log(`[CMS] Fetching settings from: ${fetchUrl}`);
+
+    const response = await fetch(fetchUrl, {
+      method: 'GET',
+      headers: headers,
+      cache: 'no-store'
+    });
+
+    if (!response.ok) {
+      throw new Error(`Gagal mengambil data CMS settings: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('[CMS] Fetch settings success, received settings:', data);
+    cachedSettings = data;
+    return data;
+  } catch (error) {
+    console.error("[CMS] Settings API Error, falling back to mock data:", error);
+    cachedSettings = MOCK_CMS_SETTINGS;
+    return MOCK_CMS_SETTINGS;
   }
 };
 

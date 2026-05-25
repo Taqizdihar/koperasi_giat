@@ -84,3 +84,26 @@ export interface CmsPost {
   updated_at: string;
 }
 
+export interface SocialLink {
+  icon: string;
+  url: string;
+}
+
+export interface CmsSettings {
+  site_name: string;
+  title: string;
+  tagline: string;
+  logo_url: string;
+  frontend_url: string;
+  copyright_text: string;
+  social_links: SocialLink[];
+  quick_links: any;
+  google_maps_url: string;
+  support_email?: string;
+  footer_text?: string;
+  footer_nav_1?: Array<{ label: string; url: string }>;
+  footer_nav_2?: Array<{ label: string; url: string }>;
+  footer_contacts?: Array<{ label: string; value: string }>;
+}
+
+

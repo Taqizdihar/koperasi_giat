@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { SERVICES, HERO_SLIDES, LATEST_INFO, PARTNERS, TESTIMONIALS } from '../constants';
 import { fetchCmsPages } from '../services/dataService';
 import { CmsPage, PageBlock } from '../types';
+import { useSettings } from '../components/SettingsContext';
 
 // Helper to map icon names to Lucide components
 const IconMap: Record<string, any> = {
@@ -258,6 +259,7 @@ const TestimonialAvatar: React.FC<{ src?: string | null; name: string }> = ({ sr
 };
 
 const Home: React.FC = () => {
+  const { settings } = useSettings();
   const [pages, setPages] = useState<CmsPage[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -356,7 +358,7 @@ const Home: React.FC = () => {
   const slides = sliderHeroBlocks.length > 0 ? sliderHeroBlocks.map((block: PageBlock, idx: number) => ({
     id: idx + 1,
     title: block.data?.headline || "Unit Usaha Produktif",
-    subtitle: homePage?.title || "Koperasi Pilihan Rakyat",
+    subtitle: settings?.site_name || homePage?.title || "Koperasi Pilihan Rakyat",
     description: block.data?.sub_headline || "Kami mengembangkan berbagai unit bisnis kreatif untuk menciptakan nilai tambah dan bagi hasil yang maksimal bagi anggota.",
     image: block.data?.background_image || HERO_SLIDES[idx % HERO_SLIDES.length].image,
     cta: "Akses eKop GIAT App",
@@ -528,8 +530,12 @@ const Home: React.FC = () => {
           className="w-16 h-16 border-4 border-t-giat-red border-r-transparent border-b-white border-l-transparent rounded-full shadow-2xl shadow-giat-red/20"
         />
         <div className="flex flex-col items-center space-y-1">
-          <span className="text-2xl font-black tracking-tighter text-white">GIAT</span>
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Loading CMS...</span>
+          <span className="text-2xl font-black tracking-tighter text-white">
+            {settings?.site_name ? settings.site_name.split(' ')[0] : 'GIAT'}
+          </span>
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
+            {settings?.site_name ? settings.site_name.split(' ').slice(1).join(' ') : 'KOPERASI'}
+          </span>
         </div>
       </div>
     );

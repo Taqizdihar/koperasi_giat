@@ -6,8 +6,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { NAV_LINKS } from '../constants';
 import { fetchCmsPages } from '../services/dataService';
 import { CmsPage } from '../types';
+import { useSettings } from './SettingsContext';
 
 const Navbar: React.FC = () => {
+  const { settings } = useSettings();
   const [pages, setPages] = useState<CmsPage[] | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -82,23 +84,31 @@ const Navbar: React.FC = () => {
     }`}>
       <div className="container mx-auto px-4 md:px-8 flex justify-between items-center">
         <Link to="/" className="flex items-center space-x-3 group perspective-1000">
-          <motion.div 
-            whileHover={{ rotateY: 180 }}
-            transition={{ duration: 0.6 }}
-            className="w-12 h-12 bg-giat-red rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-giat-red/20 preserve-3d"
-          >
-            G
-          </motion.div>
+          {settings?.logo_url ? (
+            <img 
+              src={settings.logo_url} 
+              alt={settings.site_name || "Logo"} 
+              className="w-12 h-12 object-contain rounded-xl"
+            />
+          ) : (
+            <motion.div 
+              whileHover={{ rotateY: 180 }}
+              transition={{ duration: 0.6 }}
+              className="w-12 h-12 bg-giat-red rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-giat-red/20 preserve-3d"
+            >
+              G
+            </motion.div>
+          )}
           <div className="flex flex-col -space-y-1">
             <span className={`text-2xl font-black tracking-tighter transition-colors duration-500 ${
               isWhiteBg ? 'text-giat-blue' : 'text-white'
             }`}>
-              GIAT
+              {settings?.site_name ? settings.site_name.split(' ')[0] : 'GIAT'}
             </span>
             <span className={`text-[10px] font-black uppercase tracking-[0.3em] opacity-50 ${
               isWhiteBg ? 'text-giat-blue' : 'text-white'
             }`}>
-              KOPERASI
+              {settings?.site_name ? settings.site_name.split(' ').slice(1).join(' ') : 'KOPERASI'}
             </span>
           </div>
         </Link>

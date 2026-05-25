@@ -4,8 +4,10 @@ import { MapPin, Phone, Mail, Clock, MessageSquareOff } from 'lucide-react';
 import { motion } from 'motion/react';
 import { fetchCmsPages } from '../services/dataService';
 import { CmsPage } from '../types';
+import { useSettings } from '../components/SettingsContext';
 
 const Contact: React.FC = () => {
+  const { settings } = useSettings();
   const [pages, setPages] = useState<CmsPage[] | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -29,20 +31,52 @@ const Contact: React.FC = () => {
   const heroBgImage = heroBlock?.data?.background_image || "";
 
   const contactTitle = contactsBlock?.data?.title || "Informasi Kontak";
+  
+  // Helper to extract fallback contacts from settings
+  const settingsAddresses = settings?.footer_contacts
+    ?.filter(c => c.label.toLowerCase().includes('alamat') || c.label.toLowerCase().includes('address'))
+    .map(c => c.value);
+  const settingsPhones = settings?.footer_contacts
+    ?.filter(c => c.label.toLowerCase().includes('telp') || c.label.toLowerCase().includes('phone') || c.label.toLowerCase().includes('wa') || c.label.toLowerCase().includes('hp') || c.label.toLowerCase().includes('no.'))
+    .map(c => c.value);
+  const settingsEmails = settings?.footer_contacts
+    ?.filter(c => c.label.toLowerCase().includes('email') || c.label.toLowerCase().includes('mail'))
+    .map(c => c.value);
+
+  const defaultAddress = settingsAddresses && settingsAddresses.length > 0
+    ? settingsAddresses[0]
+    : settings?.google_maps_url || "Jl. Ekonomi Makmur No. 88, Tebet, Jakarta Selatan, 12810";
+
   const addressesList = contactsBlock?.data?.addresses && contactsBlock.data.addresses.length > 0
     ? contactsBlock.data.addresses
-    : ["Jl. Ekonomi Makmur No. 88, Tebet, Jakarta Selatan, 12810"];
+    : [defaultAddress];
   
   const phoneNumbersList = contactsBlock?.data?.phone_numbers && contactsBlock.data.phone_numbers.length > 0
     ? contactsBlock.data.phone_numbers
-    : ["(021) 1234-5678 / +62 812 3456 7890"];
+    : (settingsPhones && settingsPhones.length > 0 ? settingsPhones : ["(021) 1234-5678 / +62 812 3456 7890"]);
 
   const emailsList = contactsBlock?.data?.emails && contactsBlock.data.emails.length > 0
     ? contactsBlock.data.emails
-    : ["info@koperasigiat.co.id"];
+    : (settingsEmails && settingsEmails.length > 0 ? settingsEmails : ["info@koperasigiat.co.id"]);
 
   const workingHours = contactsBlock?.data?.working_hours || "Senin - Jumat: 08:00 - 17:00 WIB\nSabtu: 08:00 - 12:00 WIB";
-  const mapLocationUrl = contactsBlock?.data?.map_location_url || "https://maps.app.goo.gl/iiTW4j6tM33NAkpj9";
+
+  const getMapLink = (urlOrAddress: string) => {
+    if (!urlOrAddress) return "https://maps.app.goo.gl/iiTW4j6tM33NAkpj9";
+    if (urlOrAddress.startsWith("http://") || urlOrAddress.startsWith("https://")) {
+      return urlOrAddress;
+    }
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(urlOrAddress)}`;
+  };
+
+  const mapLocationUrl = contactsBlock?.data?.map_location_url || getMapLink(settings?.google_maps_url || "https://maps.app.goo.gl/iiTW4j6tM33NAkpj9");
+
+  // Dynamic values for WA/Email redirections if online form is disabled
+  const rawPhone = phoneNumbersList[0] || "";
+  const cleanPhone = rawPhone.replace(/\D/g, "");
+  const waPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.substring(1) : (cleanPhone.startsWith('8') ? '62' + cleanPhone : cleanPhone);
+  const waLink = waPhone ? `https://wa.me/${waPhone}` : "https://wa.me/6281234567890";
+  const contactEmail = emailsList[0] || settings?.support_email || "info@koperasigiat.co.id";
 
   return (
     <div>
@@ -215,7 +249,7 @@ const Contact: React.FC = () => {
                     className="flex flex-col sm:flex-row gap-4 w-full justify-center relative z-10"
                   >
                     <a 
-                      href="https://wa.me/6281234567890" 
+                      href={waLink} 
                       target="_blank" 
                       rel="noopener noreferrer" 
                       className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center space-x-2 transition-all shadow-lg shadow-green-500/20 hover:scale-105 active:scale-95"
@@ -224,7 +258,7 @@ const Contact: React.FC = () => {
                       <span>Hubungi via WhatsApp</span>
                     </a>
                     <a 
-                      href="mailto:info@koperasigiat.co.id" 
+                      href={`mailto:${contactEmail}`} 
                       className="bg-giat-blue hover:bg-blue-900 text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center space-x-2 transition-all shadow-lg shadow-giat-blue/20 hover:scale-105 active:scale-95"
                     >
                       <Mail size={20} />
