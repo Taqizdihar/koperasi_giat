@@ -57,6 +57,10 @@ const Navbar: React.FC = () => {
     });
   }
 
+  // Filter out Keanggotaan path so it's only accessible from CTA buttons
+  navLinks = navLinks.filter(link => link.path !== '/keanggotaan');
+
+
 
   useEffect(() => {
     const handleScroll = () => {
