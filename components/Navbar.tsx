@@ -23,21 +23,39 @@ const Navbar: React.FC = () => {
   }, []);
 
   const getPathFromSlug = (slug: string) => {
-    if (slug === 'koperasi-giat') return '/';
-    if (slug === 'tentang-kami') return '/tentang';
-    if (slug === 'layanan-produk') return '/layanan';
-    return `/${slug}`;
+    const cleanSlug = slug.startsWith('/') ? slug.substring(1) : slug;
+    if (cleanSlug === 'koperasi-giat') return '/';
+    if (cleanSlug === 'tentang-kami') return '/tentang';
+    if (cleanSlug === 'layanan-produk') return '/layanan';
+    return `/${cleanSlug}`;
   };
 
-  const navLinks = pages && pages.length > 0
-    ? pages
-        .filter(p => p.is_in_navbar === 1 && p.status === 'published')
-        .sort((a, b) => a.priority - b.priority)
-        .map(p => ({
-          label: p.title === "Koperasi Giat" ? "Beranda" : p.title,
-          path: getPathFromSlug(p.slug)
-        }))
-    : NAV_LINKS;
+  // Start with default links as the base/fallback list so the navbar is always complete
+  let navLinks = [...NAV_LINKS];
+
+  if (pages && pages.length > 0) {
+    const cmsLinks = pages
+      .filter(p => p.is_in_navbar === 1 && p.status === 'published')
+      .sort((a, b) => a.priority - b.priority)
+      .map(p => ({
+        label: p.title === "Koperasi Giat" ? "Beranda" : p.title,
+        path: getPathFromSlug(p.slug)
+      }));
+
+    // Merge CMS links into defaults to keep default links active even if not in CMS yet,
+    // while overriding labels for those that exist in CMS and appending new ones.
+    cmsLinks.forEach(cmsLink => {
+      const existingIndex = navLinks.findIndex(link => link.path === cmsLink.path);
+      if (existingIndex !== -1) {
+        navLinks[existingIndex] = {
+          ...navLinks[existingIndex],
+          label: cmsLink.label
+        };
+      } else {
+        navLinks.push(cmsLink);
+      }
+    });
+  }
 
 
   useEffect(() => {

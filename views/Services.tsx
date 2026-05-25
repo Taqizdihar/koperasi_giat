@@ -250,24 +250,52 @@ const Services: React.FC = () => {
   const servicesPagesArray = pages && Array.isArray(pages) ? pages : [];
   const servicesPage = servicesPagesArray.find(p => p && (p.slug === 'layanan-produk' || p.slug === 'layanan')) || servicesPagesArray[0];
   
-  const ctaBlock = servicesPage?.content?.find((block: PageBlock) => block && block.type === 'cta-banner');
-  const featuresBlock = servicesPage?.content?.find((block: PageBlock) => block && block.type === 'features');
+  // Find all blocks of type 'cta-banner'
+  const ctaBlocks = servicesPage?.content?.filter((block: PageBlock) => block && block.type === 'cta-banner') || [];
+  
+  // Hero block is the first cta-banner
+  const heroBlock = ctaBlocks[0];
+
+  // Final CTA block is the second cta-banner (or has different ID)
+  const finalCtaBlock = ctaBlocks.find((block: PageBlock) => block.id !== heroBlock?.id) || ctaBlocks[1];
+  
+  // Find all blocks of type 'features'
+  const featuresBlocks = servicesPage?.content?.filter((block: PageBlock) => block && block.type === 'features') || [];
+  
+  // Main features block (Layanan & Produk Unggulan)
+  const mainFeaturesBlock = featuresBlocks.find(
+    (block: PageBlock) => !block.data?.title?.toLowerCase().includes('retail')
+  ) || featuresBlocks[0];
+
+  // Retail features block (Produk Retail GIAT)
+  const retailFeaturesBlock = featuresBlocks.find(
+    (block: PageBlock) => block.data?.title?.toLowerCase().includes('retail')
+  ) || featuresBlocks[1];
 
   // Extract Hero (cta-banner) details safely
-  const heroHeadline = ctaBlock?.data?.headline || "Layanan & Produk GIAT";
-  const heroSubHeadline = ctaBlock?.data?.sub_headline || "Kami menghadirkan ekosistem ekonomi gotong royong melalui akses simpan pinjam yang adil, pembiayaan modal usaha produktif, tabungan masa depan, serta program pemberdayaan UMKM, perlindungan asuransi, dan berbagai produk ekonomi kreatif bagi seluruh anggota.";
-  const heroBgColor = ctaBlock?.data?.background_color || "#153B8F";
-  const heroBgImageUrl = ctaBlock?.data?.background_image_url || null;
-  const heroButtonText = ctaBlock?.data?.button_text || "Konsultasi Sekarang";
-  const heroButtonLink = ctaBlock?.data?.button_link || "/kontak";
+  const heroHeadline = heroBlock?.data?.headline || "Layanan & Produk GIAT";
+  const heroSubHeadline = heroBlock?.data?.sub_headline || "Kami menghadirkan ekosistem ekonomi gotong royong melalui akses simpan pinjam yang adil, pembiayaan modal usaha produktif, tabungan masa depan, serta program pemberdayaan UMKM, perlindungan asuransi, dan berbagai produk ekonomi kreatif bagi seluruh anggota.";
+  const heroBgColor = heroBlock?.data?.background_color || "#153B8F";
+  const heroBgImageUrl = heroBlock?.data?.background_image_url || null;
+  const heroButtonText = heroBlock?.data?.button_text || "Konsultasi Sekarang";
+  const heroButtonLink = heroBlock?.data?.button_link || "/kontak";
+
+  // Extract Final CTA details safely
+  const finalCtaHeadline = finalCtaBlock?.data?.headline || "Wujudkan Impian Anda";
+  const finalCtaSubHeadline = finalCtaBlock?.data?.sub_headline || "Siap Memulai Langkah Bersama Koperasi GIAT?";
+  const finalCtaDescription = finalCtaBlock?.data?.description || "Ribuan anggota telah merasakan manfaat nyata dari sistem gotong royong kami. Jadilah bagian dari perubahan ekonomi yang lebih adil and produktif.";
+  const finalCtaButtonText = finalCtaBlock?.data?.button_text || "Daftar Anggota";
+  const finalCtaButtonLink = finalCtaBlock?.data?.button_link || "/keanggotaan";
+  const finalCtaBgColor = finalCtaBlock?.data?.background_color || "#E11D48";
+  const finalCtaBgImageUrl = finalCtaBlock?.data?.background_image_url || null;
 
   // Extract features details safely
-  const featuresTitle = featuresBlock?.data?.title || "Layanan & Produk Unggulan";
-  const featuresSubtitle = featuresBlock?.data?.subtitle || "Portofolio Kami";
+  const featuresTitle = mainFeaturesBlock?.data?.title || "Layanan & Produk Unggulan";
+  const featuresSubtitle = mainFeaturesBlock?.data?.subtitle || "Portofolio Kami";
 
   // Build the dynamic services list using features block items, with fallback to local SERVICE_LIST
-  const dynamicServices = featuresBlock?.data?.items && Array.isArray(featuresBlock.data.items) && featuresBlock.data.items.length > 0
-    ? featuresBlock.data.items.map((item: any, idx: number) => {
+  const dynamicServices = mainFeaturesBlock?.data?.items && Array.isArray(mainFeaturesBlock.data.items) && mainFeaturesBlock.data.items.length > 0
+    ? mainFeaturesBlock.data.items.map((item: any, idx: number) => {
         const parsed = parseCmsServiceItem(item);
         return {
           id: `cms-service-${idx}`,
@@ -280,6 +308,42 @@ const Services: React.FC = () => {
         };
       })
     : SERVICE_LIST;
+
+  // Extract retail features details safely
+  const retailTitle = retailFeaturesBlock?.data?.title || "Produk Retail GIAT";
+  const retailSubtitle = retailFeaturesBlock?.data?.subtitle || "Koperasi GIAT mengelola berbagai unit usaha retail untuk melayani kebutuhan civitas akademika dan masyarakat luas.";
+
+  // Build the dynamic retail products list using the retail features block items, with fallback to local RETAIL_PRODUCTS
+  const dynamicRetailProducts = retailFeaturesBlock?.data?.items && Array.isArray(retailFeaturesBlock.data.items) && retailFeaturesBlock.data.items.length > 0
+    ? retailFeaturesBlock.data.items.map((item: any, idx: number) => {
+        const getFallback = (title: string, index: number) => {
+          const normalized = (title || '').toLowerCase().trim();
+          const found = RETAIL_PRODUCTS.find(p => p.title.toLowerCase().trim() === normalized);
+          return found || RETAIL_PRODUCTS[index % RETAIL_PRODUCTS.length];
+        };
+        const fallback = getFallback(item.title, idx);
+        
+        return {
+          id: `cms-retail-${idx}`,
+          title: item.title || fallback.title,
+          description: item.description || fallback.description,
+          location: item.location || fallback.location,
+          image: item.icon_url || fallback.image,
+          link: item.link_url || '/kontak'
+        };
+      })
+    : RETAIL_PRODUCTS;
+
+  // FAQ block from CMS
+  const faqBlock = servicesPage?.content?.find((block: PageBlock) => block && block.type === 'faq');
+  const faqTitle = faqBlock?.data?.title || "Pertanyaan Umum";
+  const faqSubtitle = faqBlock?.data?.subtitle || "Hal-hal yang sering ditanyakan oleh anggota mengenai layanan kami.";
+  const dynamicFaqs = faqBlock?.data?.items && Array.isArray(faqBlock.data.items) && faqBlock.data.items.length > 0
+    ? faqBlock.data.items.map((item: any) => ({
+        q: item.question || item.q || '',
+        a: item.answer || item.a || ''
+      }))
+    : FAQ_ITEMS;
 
   return (
     <div className="bg-white">
@@ -381,16 +445,16 @@ const Services: React.FC = () => {
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
             <div className="space-y-4">
               <h2 className="text-giat-red font-bold tracking-widest uppercase text-xs md:text-sm">Unit Bisnis Terpadu</h2>
-              <h3 className="text-2xl md:text-4xl font-black text-giat-blue">Produk Retail GIAT</h3>
+              <h3 className="text-2xl md:text-4xl font-black text-giat-blue">{retailTitle}</h3>
               <div className="w-16 h-1 bg-giat-red rounded-full"></div>
             </div>
             <p className="text-gray-500 font-medium max-w-md">
-              Koperasi GIAT mengelola berbagai unit usaha retail untuk melayani kebutuhan civitas akademika dan masyarakat luas.
+              {retailSubtitle}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {RETAIL_PRODUCTS.map((product) => (
+            {dynamicRetailProducts.map((product) => (
               <div key={product.id} className="group bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 flex flex-col h-full">
                 {/* Image Wrap */}
                 <div className="relative h-64 overflow-hidden">
@@ -419,7 +483,7 @@ const Services: React.FC = () => {
                     {product.description}
                   </p>
                   <div className="pt-6 mt-auto border-t border-gray-50">
-                    <Link to="/kontak" className="inline-flex items-center text-giat-blue font-black text-sm group/btn">
+                    <Link to={product.link} className="inline-flex items-center text-giat-blue font-black text-sm group/btn">
                       Kunjungi Toko 
                       <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
                     </Link>
@@ -438,12 +502,12 @@ const Services: React.FC = () => {
             <div className="bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <HelpCircle className="w-8 h-8 text-giat-red" />
             </div>
-            <h2 className="text-3xl font-black text-giat-blue">Pertanyaan Umum</h2>
-            <p className="text-gray-500 font-medium">Hal-hal yang sering ditanyakan oleh anggota mengenai layanan kami.</p>
+            <h2 className="text-3xl font-black text-giat-blue">{faqTitle}</h2>
+            <p className="text-gray-500 font-medium">{faqSubtitle}</p>
           </div>
 
           <div className="space-y-4">
-            {FAQ_ITEMS.map((faq, i) => (
+            {dynamicFaqs.map((faq, i) => (
               <div key={i} className="border border-gray-100 rounded-2xl overflow-hidden shadow-sm transition-all hover:shadow-md">
                 <button 
                   onClick={() => toggleFaq(i)}
@@ -466,19 +530,26 @@ const Services: React.FC = () => {
       {/* Final CTA */}
       <section className="py-24 px-4 bg-white">
         <div className="container mx-auto">
-          <div className="bg-giat-red rounded-[4rem] p-12 md:p-24 text-center text-white relative overflow-hidden shadow-2xl">
+          <div 
+            style={{ 
+              backgroundColor: finalCtaBgImageUrl ? undefined : finalCtaBgColor,
+              backgroundImage: finalCtaBgImageUrl ? `url(${finalCtaBgImageUrl})` : undefined,
+              backgroundSize: finalCtaBgImageUrl ? 'cover' : undefined,
+              backgroundPosition: finalCtaBgImageUrl ? 'center' : undefined,
+            }}
+            className="rounded-[4rem] p-12 md:p-24 text-center text-white relative overflow-hidden shadow-2xl"
+          >
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
             
             <div className="relative z-10 max-w-3xl mx-auto space-y-12">
-              <div className="inline-flex bg-white/10 border border-white/20 px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest">Wujudkan Impian Anda</div>
-              <h2 className="text-2xl md:text-4xl font-black leading-tight">Siap Memulai Langkah <br className="hidden md:block" /> Bersama Koperasi GIAT?</h2>
+              <div className="inline-flex bg-white/10 border border-white/20 px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest">{finalCtaHeadline}</div>
+              <h2 className="text-2xl md:text-4xl font-black leading-tight">{finalCtaSubHeadline}</h2>
               <p className="text-xl text-red-50/90 leading-relaxed font-medium">
-                Ribuan anggota telah merasakan manfaat nyata dari sistem gotong royong kami. 
-                Jadilah bagian dari perubahan ekonomi yang lebih adil and produktif.
+                {finalCtaDescription}
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-6 pt-4">
                 <Link to="/keanggotaan" className="bg-white text-giat-red px-12 py-5 rounded-2xl font-black text-xl hover:bg-gray-50 transition-all shadow-2xl hover:scale-105 active:scale-95">
-                  Daftar Anggota
+                  {finalCtaButtonText}
                 </Link>
                 <Link to="/kontak" className="border-2 border-white/30 text-white px-12 py-5 rounded-2xl font-black text-xl hover:bg-white/10 transition-all hover:scale-105 active:scale-95">
                   Hubungi Kami
