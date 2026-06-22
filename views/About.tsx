@@ -171,6 +171,7 @@ const About: React.FC = () => {
         "Berawal dari hanya 50 anggota pendiri dengan modal swadaya, kini Koperasi GIAT telah tumbuh menjadi salah satu koperasi terbesar di wilayahnya dengan ribuan anggota yang tersebar di berbagai sektor industri."
       ];
   const historyQuote = parsedHistory?.quote || "Kami terus bertransformasi mengikuti perkembangan teknologi tanpa meninggalkan nilai-nilai dasar kekeluargaan yang telah menjadi pondasi kami selama lebih dari dua dekade.";
+  const historyImage = historyBlock?.data?.images?.[0]?.url || "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2070&auto=format&fit=crop";
 
   // Visi & Misi Block
   const featuresBlocks = aboutPage?.content?.filter((block: PageBlock) => block.type === 'features') || [];
@@ -325,8 +326,8 @@ const About: React.FC = () => {
             <div className="lg:w-1/2 relative group">
               <div className="absolute -inset-4 bg-giat-red/10 rounded-[2.5rem] blur-2xl group-hover:bg-giat-red/20 transition-all duration-700"></div>
               <img 
-                src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2070&auto=format&fit=crop" 
-                alt="History" 
+                src={historyImage} 
+                alt={historyTitle} 
                 className="relative rounded-[2rem] shadow-2xl grayscale hover:grayscale-0 transition-all duration-700" 
               />
             </div>
