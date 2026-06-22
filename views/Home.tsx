@@ -3,8 +3,36 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Users, Target, Shield, Wallet, TrendingUp, Award, ShieldCheck, ChevronLeft, ChevronRight, Calendar, User, Quote, Star, CreditCard, Smartphone, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SERVICES, HERO_SLIDES, LATEST_INFO, PARTNERS, TESTIMONIALS } from '../constants';
-import { fetchCmsPages } from '../services/dataService';
-import { CmsPage, PageBlock } from '../types';
+import { fetchCmsPages, fetchCmsPosts } from '../services/dataService';
+import { CmsPage, CmsPost, PageBlock } from '../types';
+
+// Helper function to format created_at date into Indonesian format
+const formatPostDate = (dateStr: string) => {
+  try {
+    const date = new Date(dateStr);
+    const months = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+  } catch (e) {
+    return dateStr;
+  }
+};
+
+// Helper function to normalize CmsPost into UI expected format
+const normalizeCmsPost = (post: CmsPost) => {
+  const contentItem = post.content?.[0];
+  return {
+    id: post.id,
+    title: post.title,
+    date: formatPostDate(post.created_at),
+    category: contentItem?.tags || post.category || "Berita",
+    image: contentItem?.featured_image || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1974&auto=format&fit=crop",
+    excerpt: post.excerpt || contentItem?.excerpt || "",
+    content: contentItem?.body_content || ""
+  };
+};
 import { useSettings } from '../components/SettingsContext';
 
 // Helper to map icon names to Lucide components
@@ -261,13 +289,18 @@ const TestimonialAvatar: React.FC<{ src?: string | null; name: string }> = ({ sr
 const Home: React.FC = () => {
   const { settings } = useSettings();
   const [pages, setPages] = useState<CmsPage[] | null>(null);
+  const [posts, setPosts] = useState<CmsPost[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const loadData = async () => {
-      const data = await fetchCmsPages();
-      if (data) setPages(data);
+      const [pagesData, postsData] = await Promise.all([
+        fetchCmsPages(),
+        fetchCmsPosts()
+      ]);
+      if (pagesData) setPages(pagesData);
+      if (postsData) setPosts(postsData);
       setLoading(false);
     };
     loadData();
@@ -421,28 +454,43 @@ const Home: React.FC = () => {
 
   // Filter and limit posts based on CMS configuration
   const getFilteredPosts = () => {
-    let posts = [...LATEST_INFO];
+    const staticPosts = LATEST_INFO.map(p => ({
+      ...p,
+      content: p.content
+    }));
+
+    const cmsPosts = posts && Array.isArray(posts) 
+      ? posts.filter(p => p && p.id).map(normalizeCmsPost) 
+      : [];
+
+    const allPostsMap = new Map<number, any>();
+    staticPosts.forEach(p => allPostsMap.set(p.id, p));
+    cmsPosts.forEach(p => allPostsMap.set(p.id, p));
+
+    const allUnifiedPosts = Array.from(allPostsMap.values());
     
+    let postsToDisplay = [...allUnifiedPosts];
+
     if (!postFeedBlock) {
-      return posts.slice(0, 4);
+      return postsToDisplay.slice(0, 4);
     }
     
     const { category, limit, sort_order, selection_mode, selected_post_ids } = postFeedBlock.data || {};
     
     if (selection_mode === 'manual' && Array.isArray(selected_post_ids) && selected_post_ids.length > 0) {
-      posts = posts.filter(post => selected_post_ids.map(id => Number(id)).includes(Number(post.id)));
+      postsToDisplay = postsToDisplay.filter(post => selected_post_ids.map(id => Number(id)).includes(Number(post.id)));
     } else {
       if (category && category !== 'Semua Kategori' && category !== 'All') {
-        posts = posts.filter(post => post.category?.toLowerCase() === category.toLowerCase());
+        postsToDisplay = postsToDisplay.filter(post => post.category?.toLowerCase() === category.toLowerCase());
       }
     }
     
     if (sort_order === 'asc') {
-      posts = posts.reverse();
+      postsToDisplay = postsToDisplay.reverse();
     }
     
     const maxLimit = typeof limit === 'number' ? limit : parseInt(limit) || 4;
-    return posts.slice(0, maxLimit);
+    return postsToDisplay.slice(0, maxLimit);
   };
 
   const displayPosts = getFilteredPosts();
