@@ -242,9 +242,9 @@ const About: React.FC = () => {
   // Team blocks (Pengawas, Pengurus, Manajemen)
   const teamBlocks = aboutPage?.content?.filter((block: PageBlock) => block.type === 'team') || [];
   
-  const pengawasBlock = teamBlocks.find((block: PageBlock) => block.data?.title?.toLowerCase().includes('pengawas'));
-  const pengurusBlock = teamBlocks.find((block: PageBlock) => block.data?.title?.toLowerCase().includes('pengurus'));
-  const manajemenBlock = teamBlocks.find((block: PageBlock) => block.data?.title?.toLowerCase().includes('manajemen'));
+  const pengawasBlock = teamBlocks.find((block: PageBlock) => block.data?.title?.toLowerCase().includes('pengawas')) || teamBlocks[0];
+  const pengurusBlock = teamBlocks.find((block: PageBlock) => block.data?.title?.toLowerCase().includes('pengurus')) || teamBlocks[1];
+  const manajemenBlock = teamBlocks.find((block: PageBlock) => block.data?.title?.toLowerCase().includes('manajemen')) || teamBlocks[2];
 
   const pengawasTitle = pengawasBlock?.data?.title || "Dewan Pengawas";
   const pengawasMembers = pengawasBlock?.data?.members?.map((m: any) => ({
