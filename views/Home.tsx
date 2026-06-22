@@ -984,31 +984,52 @@ const Home: React.FC = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {displayPosts.map((info, idx) => (
               <motion.div
                 key={info.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="group bg-white rounded-3xl overflow-hidden shadow-[0_20px_40px_-20px_rgba(30,58,138,0.1)] hover:shadow-[0_40px_80px_-20px_rgba(30,58,138,0.2)] transition-all duration-700"
+                transition={{ duration: 0.5, delay: idx * 0.05 }}
+                className="group bg-white rounded-[3rem] overflow-hidden border border-transparent hover:border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500"
               >
                 <Link to={`/informasi/${info.id}`} className="block">
-                  <div className="relative h-56 overflow-hidden">
-                    <img src={info.image} alt={info.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                    <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-xl px-4 py-1.5 rounded-xl text-[10px] font-black text-giat-red uppercase tracking-widest shadow-2xl">
+                  <div className="relative h-80 overflow-hidden">
+                    <img 
+                      src={info.image} 
+                      alt={info.title} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                    />
+                    <div className="absolute top-6 left-6 px-4 py-2 bg-white/90 backdrop-blur-md rounded-full text-giat-red text-xs font-black uppercase tracking-widest shadow-lg">
                       {info.category}
                     </div>
                   </div>
-                  <div className="p-8 space-y-4">
-                    <div className="flex items-center text-gray-400 text-[10px] font-black uppercase tracking-widest gap-4">
-                      <div className="flex items-center gap-2"><Calendar size={12} className="text-giat-red" /> {info.date}</div>
-                      <div className="flex items-center gap-2"><User size={12} className="text-giat-red" /> GIAT</div>
+                  <div className="p-10 space-y-6">
+                    <div className="flex items-center gap-6 text-gray-400 text-sm font-bold">
+                      <div className="flex items-center gap-2">
+                        <Calendar size={16} className="text-giat-red" />
+                        {info.date}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <User size={16} className="text-giat-red" />
+                        Admin
+                      </div>
                     </div>
-                    <h4 className="text-xl font-black text-giat-blue leading-tight group-hover:text-giat-red transition-colors line-clamp-2">
+                    <h3 className="text-2xl font-black text-giat-blue leading-tight group-hover:text-giat-red transition-colors">
                       {info.title}
-                    </h4>
+                    </h3>
+                    <p className="text-gray-500 font-medium leading-relaxed line-clamp-2">
+                      {info.excerpt}
+                    </p>
+                    <div className="pt-4">
+                      <div className="inline-flex items-center text-giat-blue font-black group-hover:text-giat-red transition-colors">
+                        Baca Selengkapnya
+                        <div className="ml-3 w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center group-hover:border-giat-red transition-colors">
+                          <ArrowRight size={18} className="translate-x-0 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </Link>
               </motion.div>
