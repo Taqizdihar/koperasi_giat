@@ -26,6 +26,17 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (data.title) {
           document.title = data.title;
         }
+        
+        // Set dynamic favicon
+        if (data.logo_url) {
+          let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+          if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+          }
+          link.href = data.logo_url;
+        }
       }
     } catch (err: any) {
       setError(err instanceof Error ? err : new Error(String(err)));
