@@ -504,6 +504,18 @@ const Home: React.FC = () => {
         { icon: <Users size={24} />, title: "Community First", desc: "Fitur eksklusif khusus untuk anggota koperasi." }
       ];
 
+  const appLabels = appHeroBlock?.data?.labels && appHeroBlock.data.labels.length >= 2 
+    ? appHeroBlock.data.labels 
+    : ["eKop Super App", "5000+ Active Users"];
+
+  const appCta = appHeroBlock?.data?.cta_buttons && appHeroBlock.data.cta_buttons.length > 0
+    ? appHeroBlock.data.cta_buttons[0]
+    : { text: "Jelajahi App", url: "https://ekop.kopgiat.id/" };
+
+  const appMobileImg = appHeroBlock?.data?.images && appHeroBlock.data.images.length > 0 && appHeroBlock.data.images[0].url
+    ? appHeroBlock.data.images[0].url
+    : "https://images.unsplash.com/photo-1551650975-87deedd944c3?q=80&w=1974&auto=format&fit=crop";
+
   // Find testimonials block from CMS
   const testimonialsBlock = homePage?.content?.find((block: PageBlock) => block.type === 'testimonials');
 
@@ -818,7 +830,7 @@ const Home: React.FC = () => {
               <div className="absolute right-[5%] bottom-0 w-[40%] md:w-[280px] z-20 transform translate-y-[-10%] translate-x-[-10%] hover:translate-y-[-15%] transition-transform duration-700 select-none">
                 <div className="relative rounded-[3.5rem] overflow-hidden shadow-[0_80px_160px_-40px_rgba(0,0,0,1)] border-[8px] border-[#1C1C1F] bg-black ring-1 ring-white/20">
                   <img 
-                    src="https://images.unsplash.com/photo-1551650975-87deedd944c3?q=80&w=1974&auto=format&fit=crop" 
+                    src={appMobileImg} 
                     alt="eKop GIAT Mobile App" 
                     className="w-full h-auto object-cover"
                   />
@@ -846,7 +858,7 @@ const Home: React.FC = () => {
                   className="inline-flex items-center gap-3 bg-blue-500/10 border border-blue-500/20 px-5 py-2 rounded-full overflow-hidden group"
                 >
                   <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                  <span className="text-blue-400 font-black tracking-[0.3em] uppercase text-[10px] block">eKop Super App</span>
+                  <span className="text-blue-400 font-black tracking-[0.3em] uppercase text-[10px] block">{appLabels[0]}</span>
                 </motion.div>
                 <h3 className="text-5xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter">
                   {appHeadline.split(' ').slice(0, -2).join(' ')} <br/> 
@@ -875,12 +887,12 @@ const Home: React.FC = () => {
 
               <div className="flex flex-col sm:flex-row gap-8 pt-10">
                 <a 
-                  href="https://ekop.kopgiat.id/"
+                  href={appCta.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-white text-[#020617] px-14 py-6 rounded-[2.5rem] font-black text-xl shadow-[0_20px_50px_rgba(255,255,255,0.1)] hover:bg-blue-50 hover:scale-105 transition-all text-center flex items-center justify-center gap-4"
                 >
-                  Jelajahi App
+                  {appCta.text}
                   <ArrowRight size={24} />
                 </a>
                 <div className="flex items-center gap-6">
@@ -889,7 +901,7 @@ const Home: React.FC = () => {
                     <div className="flex gap-1">
                       {[1, 2, 3, 4, 5].map(s => <Sparkles key={s} size={12} className="text-blue-400" />)}
                     </div>
-                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">5000+ Active Users</p>
+                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">{appLabels[1]}</p>
                   </div>
                 </div>
               </div>
