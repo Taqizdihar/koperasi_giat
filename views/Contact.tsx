@@ -88,6 +88,8 @@ const Contact: React.FC = () => {
   const mapHeroCtaUrl = mapHeroBlock?.data?.cta_buttons?.[0]?.url || mapLocationUrl;
 
   const waChannelHeadline = waChannelHeroBlock?.data?.headline || "Follow our WhatsApp Channel";
+  const waChannelSubHeadline = waChannelHeroBlock?.data?.sub_headline || "Dapatkan pembaruan langsung, berita terkini, dan informasi eksklusif dari Koperasi GIAT langsung di genggaman Anda.";
+  const waChannelLabel = waChannelHeroBlock?.data?.labels?.[0] || "Komunitas GIAT";
   const waChannelCtaText = waChannelHeroBlock?.data?.cta_buttons?.[0]?.text || "WhatsApp Channel";
   const waChannelCtaUrl = waChannelHeroBlock?.data?.cta_buttons?.[0]?.url || "#";
   const waChannelImage = waChannelHeroBlock?.data?.images?.[0]?.url || "";
@@ -298,13 +300,13 @@ const Contact: React.FC = () => {
               <div className="flex-1 space-y-6 text-center md:text-left">
                 <div className="inline-flex items-center space-x-2 bg-green-100 text-green-700 px-4 py-2 rounded-full font-bold text-sm">
                   <Phone size={16} />
-                  <span>Komunitas GIAT</span>
+                  <span>{waChannelLabel}</span>
                 </div>
                 <h2 className="text-3xl md:text-5xl font-black text-gray-800 leading-tight">
                   {waChannelHeadline}
                 </h2>
                 <p className="text-gray-500 text-lg">
-                  Dapatkan pembaruan langsung, berita terkini, dan informasi eksklusif dari Koperasi GIAT langsung di genggaman Anda.
+                  {waChannelSubHeadline}
                 </p>
                 <a 
                   href={waChannelCtaUrl} 
