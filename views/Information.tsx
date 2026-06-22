@@ -21,14 +21,13 @@ const formatPostDate = (dateStr: string) => {
   }
 };
 
-// Helper function to normalize CmsPost into UI expected format
-const normalizeCmsPost = (post: CmsPost) => {
+const normalizeCmsPost = (post: CmsPost | any) => {
   const contentItem = post.content?.[0];
   return {
     id: post.id,
     title: post.title,
     date: formatPostDate(post.created_at),
-    category: contentItem?.tags || post.category || "Berita",
+    category: contentItem?.tags || post.category_name || post.category || "Berita",
     image: contentItem?.featured_image || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1974&auto=format&fit=crop",
     excerpt: post.excerpt || contentItem?.excerpt || "",
     content: contentItem?.body_content || ""
@@ -150,7 +149,8 @@ const Information: React.FC = () => {
     
     feedBlocks.forEach(block => {
       if (!block || !block.data) return;
-      let postsList = [...allUnifiedPosts];
+      // Sort descending by ID so newest posts are first
+      let postsList = [...allUnifiedPosts].sort((a, b) => b.id - a.id);
       const { category, limit, sort_order, selection_mode, selected_post_ids } = block.data || {};
       
       if (selection_mode === 'manual' && Array.isArray(selected_post_ids) && selected_post_ids.length > 0) {
