@@ -563,7 +563,7 @@ const Home: React.FC = () => {
 
   const appMobileImg = appHeroBlock?.data?.images && appHeroBlock.data.images.length > 0 && appHeroBlock.data.images[0].url
     ? appHeroBlock.data.images[0].url
-    : "https://images.unsplash.com/photo-1551650975-87deedd944c3?q=80&w=1974&auto=format&fit=crop";
+    : null;
 
   // Find testimonials block from CMS
   const testimonialsBlock = homePage?.content?.find((block: PageBlock) => block.type === 'testimonials');
@@ -876,19 +876,21 @@ const Home: React.FC = () => {
               </div>
 
               {/* iPhone 15 Pro - Mobile View */}
-              <div className="absolute right-[5%] bottom-0 w-[40%] md:w-[280px] z-20 transform translate-y-[-10%] translate-x-[-10%] hover:translate-y-[-15%] transition-transform duration-700 select-none">
-                <div className="relative rounded-[3.5rem] overflow-hidden shadow-[0_80px_160px_-40px_rgba(0,0,0,1)] border-[8px] border-[#1C1C1F] bg-black ring-1 ring-white/20">
-                  <img 
-                    src={appMobileImg} 
-                    alt="eKop GIAT Mobile App" 
-                    className="w-full h-auto object-cover"
-                  />
-                  {/* Screen gloss effect */}
-                  <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+              {appMobileImg && (
+                <div className="absolute right-[5%] bottom-0 w-[40%] md:w-[280px] z-20 transform translate-y-[-10%] translate-x-[-10%] hover:translate-y-[-15%] transition-transform duration-700 select-none">
+                  <div className="relative rounded-[3.5rem] overflow-hidden shadow-[0_80px_160px_-40px_rgba(0,0,0,1)] border-[8px] border-[#1C1C1F] bg-black ring-1 ring-white/20">
+                    <img 
+                      src={appMobileImg} 
+                      alt="eKop GIAT Mobile App" 
+                      className="w-full h-auto object-cover"
+                    />
+                    {/* Screen gloss effect */}
+                    <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+                  </div>
+                  {/* Floating Shadow for Phone */}
+                  <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-3/4 h-10 bg-black/60 blur-2xl rounded-full" />
                 </div>
-                {/* Floating Shadow for Phone */}
-                <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-3/4 h-10 bg-black/60 blur-2xl rounded-full" />
-              </div>
+              )}
             </motion.div>
 
             {/* Content Side */}
