@@ -3,8 +3,36 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Users, Target, Shield, Wallet, TrendingUp, Award, ShieldCheck, ChevronLeft, ChevronRight, Calendar, User, Quote, Star, CreditCard, Smartphone, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SERVICES, HERO_SLIDES, LATEST_INFO, PARTNERS, TESTIMONIALS } from '../constants';
-import { fetchCmsPages } from '../services/dataService';
-import { CmsPage, PageBlock } from '../types';
+import { fetchCmsPages, fetchCmsPosts } from '../services/dataService';
+import { CmsPage, CmsPost, PageBlock } from '../types';
+
+// Helper function to format created_at date into Indonesian format
+const formatPostDate = (dateStr: string) => {
+  try {
+    const date = new Date(dateStr);
+    const months = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+  } catch (e) {
+    return dateStr;
+  }
+};
+
+// Helper function to normalize CmsPost into UI expected format
+const normalizeCmsPost = (post: CmsPost | any) => {
+  const contentItem = post.content?.[0];
+  return {
+    id: post.id,
+    title: post.title,
+    date: formatPostDate(post.created_at),
+    category: contentItem?.tags || post.category_name || post.category || "Berita",
+    image: contentItem?.featured_image || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1974&auto=format&fit=crop",
+    excerpt: post.excerpt || contentItem?.excerpt || "",
+    content: contentItem?.body_content || ""
+  };
+};
 import { useSettings } from '../components/SettingsContext';
 
 // Helper to map icon names to Lucide components
@@ -261,13 +289,18 @@ const TestimonialAvatar: React.FC<{ src?: string | null; name: string }> = ({ sr
 const Home: React.FC = () => {
   const { settings } = useSettings();
   const [pages, setPages] = useState<CmsPage[] | null>(null);
+  const [posts, setPosts] = useState<CmsPost[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const loadData = async () => {
-      const data = await fetchCmsPages();
-      if (data) setPages(data);
+      const [pagesData, postsData] = await Promise.all([
+        fetchCmsPages(),
+        fetchCmsPosts()
+      ]);
+      if (pagesData) setPages(pagesData);
+      if (postsData) setPosts(postsData);
       setLoading(false);
     };
     loadData();
@@ -421,28 +454,44 @@ const Home: React.FC = () => {
 
   // Filter and limit posts based on CMS configuration
   const getFilteredPosts = () => {
-    let posts = [...LATEST_INFO];
+    const staticPosts = LATEST_INFO.map(p => ({
+      ...p,
+      content: p.content
+    }));
+
+    const cmsPosts = posts && Array.isArray(posts) 
+      ? posts.filter(p => p && p.id).map(normalizeCmsPost) 
+      : [];
+
+    const allPostsMap = new Map<number, any>();
+    staticPosts.forEach(p => allPostsMap.set(p.id, p));
+    cmsPosts.forEach(p => allPostsMap.set(p.id, p));
+
+    const allUnifiedPosts = Array.from(allPostsMap.values());
     
+    // Sort descending by ID so newest posts are first
+    let postsToDisplay = [...allUnifiedPosts].sort((a, b) => b.id - a.id);
+
     if (!postFeedBlock) {
-      return posts.slice(0, 4);
+      return postsToDisplay.slice(0, 4);
     }
     
     const { category, limit, sort_order, selection_mode, selected_post_ids } = postFeedBlock.data || {};
     
     if (selection_mode === 'manual' && Array.isArray(selected_post_ids) && selected_post_ids.length > 0) {
-      posts = posts.filter(post => selected_post_ids.map(id => Number(id)).includes(Number(post.id)));
+      postsToDisplay = postsToDisplay.filter(post => selected_post_ids.map(id => Number(id)).includes(Number(post.id)));
     } else {
       if (category && category !== 'Semua Kategori' && category !== 'All') {
-        posts = posts.filter(post => post.category?.toLowerCase() === category.toLowerCase());
+        postsToDisplay = postsToDisplay.filter(post => post.category?.toLowerCase() === category.toLowerCase());
       }
     }
     
     if (sort_order === 'asc') {
-      posts = posts.reverse();
+      postsToDisplay = postsToDisplay.reverse();
     }
     
     const maxLimit = typeof limit === 'number' ? limit : parseInt(limit) || 4;
-    return posts.slice(0, maxLimit);
+    return postsToDisplay.slice(0, maxLimit);
   };
 
   const displayPosts = getFilteredPosts();
@@ -514,7 +563,7 @@ const Home: React.FC = () => {
 
   const appMobileImg = appHeroBlock?.data?.images && appHeroBlock.data.images.length > 0 && appHeroBlock.data.images[0].url
     ? appHeroBlock.data.images[0].url
-    : "https://images.unsplash.com/photo-1551650975-87deedd944c3?q=80&w=1974&auto=format&fit=crop";
+    : null;
 
   // Find testimonials block from CMS
   const testimonialsBlock = homePage?.content?.find((block: PageBlock) => block.type === 'testimonials');
@@ -827,19 +876,21 @@ const Home: React.FC = () => {
               </div>
 
               {/* iPhone 15 Pro - Mobile View */}
-              <div className="absolute right-[5%] bottom-0 w-[40%] md:w-[280px] z-20 transform translate-y-[-10%] translate-x-[-10%] hover:translate-y-[-15%] transition-transform duration-700 select-none">
-                <div className="relative rounded-[3.5rem] overflow-hidden shadow-[0_80px_160px_-40px_rgba(0,0,0,1)] border-[8px] border-[#1C1C1F] bg-black ring-1 ring-white/20">
-                  <img 
-                    src={appMobileImg} 
-                    alt="eKop GIAT Mobile App" 
-                    className="w-full h-auto object-cover"
-                  />
-                  {/* Screen gloss effect */}
-                  <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+              {appMobileImg && (
+                <div className="absolute right-[5%] bottom-0 w-[40%] md:w-[280px] z-20 transform translate-y-[-10%] translate-x-[-10%] hover:translate-y-[-15%] transition-transform duration-700 select-none">
+                  <div className="relative rounded-[3.5rem] overflow-hidden shadow-[0_80px_160px_-40px_rgba(0,0,0,1)] border-[8px] border-[#1C1C1F] bg-black ring-1 ring-white/20">
+                    <img 
+                      src={appMobileImg} 
+                      alt="eKop GIAT Mobile App" 
+                      className="w-full h-auto object-cover"
+                    />
+                    {/* Screen gloss effect */}
+                    <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+                  </div>
+                  {/* Floating Shadow for Phone */}
+                  <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-3/4 h-10 bg-black/60 blur-2xl rounded-full" />
                 </div>
-                {/* Floating Shadow for Phone */}
-                <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-3/4 h-10 bg-black/60 blur-2xl rounded-full" />
-              </div>
+              )}
             </motion.div>
 
             {/* Content Side */}
@@ -936,31 +987,52 @@ const Home: React.FC = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {displayPosts.map((info, idx) => (
               <motion.div
                 key={info.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="group bg-white rounded-3xl overflow-hidden shadow-[0_20px_40px_-20px_rgba(30,58,138,0.1)] hover:shadow-[0_40px_80px_-20px_rgba(30,58,138,0.2)] transition-all duration-700"
+                transition={{ duration: 0.5, delay: idx * 0.05 }}
+                className="group bg-white rounded-[3rem] overflow-hidden border border-transparent hover:border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500"
               >
                 <Link to={`/informasi/${info.id}`} className="block">
-                  <div className="relative h-56 overflow-hidden">
-                    <img src={info.image} alt={info.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                    <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-xl px-4 py-1.5 rounded-xl text-[10px] font-black text-giat-red uppercase tracking-widest shadow-2xl">
+                  <div className="relative h-80 overflow-hidden">
+                    <img 
+                      src={info.image} 
+                      alt={info.title} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                    />
+                    <div className="absolute top-6 left-6 px-4 py-2 bg-white/90 backdrop-blur-md rounded-full text-giat-red text-xs font-black uppercase tracking-widest shadow-lg">
                       {info.category}
                     </div>
                   </div>
-                  <div className="p-8 space-y-4">
-                    <div className="flex items-center text-gray-400 text-[10px] font-black uppercase tracking-widest gap-4">
-                      <div className="flex items-center gap-2"><Calendar size={12} className="text-giat-red" /> {info.date}</div>
-                      <div className="flex items-center gap-2"><User size={12} className="text-giat-red" /> GIAT</div>
+                  <div className="p-10 space-y-6">
+                    <div className="flex items-center gap-6 text-gray-400 text-sm font-bold">
+                      <div className="flex items-center gap-2">
+                        <Calendar size={16} className="text-giat-red" />
+                        {info.date}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <User size={16} className="text-giat-red" />
+                        Admin
+                      </div>
                     </div>
-                    <h4 className="text-xl font-black text-giat-blue leading-tight group-hover:text-giat-red transition-colors line-clamp-2">
+                    <h3 className="text-2xl font-black text-giat-blue leading-tight group-hover:text-giat-red transition-colors">
                       {info.title}
-                    </h4>
+                    </h3>
+                    <p className="text-gray-500 font-medium leading-relaxed line-clamp-2">
+                      {info.excerpt}
+                    </p>
+                    <div className="pt-4">
+                      <div className="inline-flex items-center text-giat-blue font-black group-hover:text-giat-red transition-colors">
+                        Baca Selengkapnya
+                        <div className="ml-3 w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center group-hover:border-giat-red transition-colors">
+                          <ArrowRight size={18} className="translate-x-0 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </Link>
               </motion.div>

@@ -23,8 +23,11 @@ const Contact: React.FC = () => {
   const contactPage = pages?.find(p => p.slug === 'kontak') || pages?.find(p => p.slug === 'koperasi-giat') || pages?.[0];
   const isFormActive = contactPage ? contactPage.is_contact_form_active : true;
 
-  const heroBlock = contactPage?.content?.find((block: any) => block.type === 'hero');
+  const heroBlocks = contactPage?.content?.filter((block: any) => block.type === 'hero') || [];
+  const heroBlock = heroBlocks[0];
   const contactsBlock = contactPage?.content?.find((block: any) => block.type === 'contacts');
+  const waChannelHeroBlock = heroBlocks.length > 2 ? heroBlocks[1] : undefined;
+  const mapHeroBlock = heroBlocks.length > 2 ? heroBlocks[2] : heroBlocks[1];
 
   const heroHeadline = heroBlock?.data?.headline || "Kontak Kami";
   const heroSubHeadline = heroBlock?.data?.sub_headline || "Kami siap melayani dan menjawab setiap pertanyaan Anda tentang Koperasi GIAT dengan sepenuh hati.";
@@ -77,6 +80,19 @@ const Contact: React.FC = () => {
   const waPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.substring(1) : (cleanPhone.startsWith('8') ? '62' + cleanPhone : cleanPhone);
   const waLink = waPhone ? `https://wa.me/${waPhone}` : "https://wa.me/6281234567890";
   const contactEmail = emailsList[0] || settings?.support_email || "info@koperasigiat.co.id";
+
+  const mapHeroHeadline = mapHeroBlock?.data?.headline || "Lokasi Kantor Pusat";
+  const mapHeroSubHeadline = mapHeroBlock?.data?.sub_headline || addressesList[0];
+  const mapHeroBgImage = mapHeroBlock?.data?.background_image || "https://picsum.photos/id/164/1920/600";
+  const mapHeroCtaText = mapHeroBlock?.data?.cta_buttons?.[0]?.text || "Buka di Google Maps →";
+  const mapHeroCtaUrl = mapHeroBlock?.data?.cta_buttons?.[0]?.url || mapLocationUrl;
+
+  const waChannelHeadline = waChannelHeroBlock?.data?.headline || "Follow our WhatsApp Channel";
+  const waChannelSubHeadline = waChannelHeroBlock?.data?.sub_headline || "Dapatkan pembaruan langsung, berita terkini, dan informasi eksklusif dari Koperasi GIAT langsung di genggaman Anda.";
+  const waChannelLabel = waChannelHeroBlock?.data?.labels?.[0] || "Komunitas GIAT";
+  const waChannelCtaText = waChannelHeroBlock?.data?.cta_buttons?.[0]?.text || "WhatsApp Channel";
+  const waChannelCtaUrl = waChannelHeroBlock?.data?.cta_buttons?.[0]?.url || "#";
+  const waChannelImage = waChannelHeroBlock?.data?.images?.[0]?.url || "";
 
   return (
     <div>
@@ -272,17 +288,61 @@ const Contact: React.FC = () => {
         </div>
       </section>
 
-      {/* Map Placeholder */}
+      {/* WA Channel Section */}
+      {waChannelHeroBlock && (
+        <section className="py-24 bg-gradient-to-br from-green-50 to-green-100 relative overflow-hidden">
+          {/* Background Decorative Pattern */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-green-500/10 rounded-full blur-[100px] -mr-64 -mt-64"></div>
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-green-500/10 rounded-full blur-[100px] -ml-64 -mb-64"></div>
+          
+          <div className="container mx-auto px-4 md:px-8 relative z-10">
+            <div className="bg-white rounded-[3rem] shadow-2xl p-10 md:p-16 max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12 border border-green-100">
+              <div className="flex-1 space-y-6 text-center md:text-left">
+                <div className="inline-flex items-center space-x-2 bg-green-100 text-green-700 px-4 py-2 rounded-full font-bold text-sm">
+                  <Phone size={16} />
+                  <span>{waChannelLabel}</span>
+                </div>
+                <h2 className="text-3xl md:text-5xl font-black text-gray-800 leading-tight">
+                  {waChannelHeadline}
+                </h2>
+                <p className="text-gray-500 text-lg">
+                  {waChannelSubHeadline}
+                </p>
+                <a 
+                  href={waChannelCtaUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-block bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-xl shadow-green-500/30 hover:-translate-y-1"
+                >
+                  {waChannelCtaText}
+                </a>
+              </div>
+              
+              {waChannelImage && (
+                <div className="w-64 h-64 md:w-80 md:h-80 flex-shrink-0 bg-white p-4 rounded-3xl shadow-xl border border-gray-100 rotate-3 hover:rotate-0 transition-transform duration-500">
+                  <img 
+                    src={waChannelImage} 
+                    alt="WhatsApp Channel QR Code" 
+                    className="w-full h-full object-contain rounded-2xl"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Map Section */}
       <section className="h-[450px] bg-gray-200 relative group overflow-hidden">
-        <a href={mapLocationUrl} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-20 flex items-center justify-center">
-          <div className="text-center bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl hover:scale-105 transition-transform duration-500">
+        <a href={mapHeroCtaUrl} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-20 flex items-center justify-center">
+          <div className="text-center bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl hover:scale-105 transition-transform duration-500 max-w-md mx-4">
             <MapPin size={48} className="mx-auto mb-4 text-giat-red" />
-            <p className="font-bold text-giat-blue text-lg">Lokasi Kantor Pusat</p>
-            <p className="text-sm font-medium">{addressesList[0]}</p>
-            <span className="text-[10px] text-giat-red font-black uppercase tracking-widest mt-2 block">Buka di Google Maps →</span>
+            <p className="font-bold text-giat-blue text-lg mb-2">{mapHeroHeadline}</p>
+            <p className="text-sm font-medium text-gray-700">{mapHeroSubHeadline}</p>
+            <span className="text-[10px] text-giat-red font-black uppercase tracking-widest mt-4 block">{mapHeroCtaText}</span>
           </div>
         </a>
-        <img src="https://picsum.photos/id/164/1920/600" alt="Map Location" className="w-full h-full object-cover opacity-60 grayscale group-hover:scale-105 transition-transform duration-1000" />
+        <img src={mapHeroBgImage} alt={mapHeroHeadline} className="w-full h-full object-cover opacity-60 grayscale group-hover:scale-105 transition-transform duration-1000" />
       </section>
     </div>
   );
