@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { LATEST_INFO } from '../constants';
+
 import { Search, Filter, Calendar, User, ArrowRight } from 'lucide-react';
 import { fetchCmsPages, fetchCmsPosts } from '../services/dataService';
 import { CmsPage, CmsPost, PageBlock } from '../types';
@@ -120,27 +120,14 @@ const Information: React.FC = () => {
   const ctaBgColor = ctaBlock?.data?.background_color || '#F9FAFB';
   const ctaBgImageUrl = ctaBlock?.data?.background_image_url || null;
 
-  // Pool all posts — the Information page is the main listing page, so it should
-  // display ALL available posts (not limit them by dynamic-post-feed block caps).
+  // Only display posts fetched from the CMS API — no hardcoded/static posts.
   const getCmsPostsPool = () => {
-    // Normalize static fallback posts
-    const staticPosts = LATEST_INFO.map(p => ({
-      ...p,
-      content: p.content // ensure standard format
-    }));
-
-    // Normalize CMS fetched posts
     const cmsPosts = posts && Array.isArray(posts) 
       ? posts.filter(p => p && p.id).map(normalizeCmsPost) 
       : [];
 
-    // Combine them in a Map to avoid duplicates by ID (CMS overwrites static ones if they share ID)
-    const allPostsMap = new Map<number, any>();
-    staticPosts.forEach(p => allPostsMap.set(p.id, p));
-    cmsPosts.forEach(p => allPostsMap.set(p.id, p));
-
-    // Return ALL unified posts sorted by newest first — no feed-block limit applied
-    return Array.from(allPostsMap.values()).sort((a, b) => b.id - a.id);
+    // Sort by newest first
+    return cmsPosts.sort((a, b) => b.id - a.id);
   };
 
   const basePosts = getCmsPostsPool();
