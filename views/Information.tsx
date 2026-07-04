@@ -71,7 +71,7 @@ const Information: React.FC = () => {
   const [posts, setPosts] = useState<CmsPost[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [visibleCount, setVisibleCount] = useState(4);
+  const [visibleCount, setVisibleCount] = useState(6);
 
   useEffect(() => {
     const loadData = async () => {
@@ -105,7 +105,6 @@ const Information: React.FC = () => {
   const infoPagesArray = pages && Array.isArray(pages) ? pages : [];
   const infoPage = infoPagesArray.find(p => p && p.slug === 'informasi') || infoPagesArray[0];
   const richTextBlock = infoPage?.content?.find((block: PageBlock) => block && block.type === 'rich-text');
-  const feedBlocks = infoPage?.content?.filter((block: PageBlock) => block && block.type === 'dynamic-post-feed') || [];
   const ctaBlock = infoPage?.content?.find((block: PageBlock) => block && block.type === 'cta-banner');
 
   const parsedHeader = richTextBlock?.data?.content ? parseInfoRichText(richTextBlock.data.content) : null;
@@ -121,7 +120,8 @@ const Information: React.FC = () => {
   const ctaBgColor = ctaBlock?.data?.background_color || '#F9FAFB';
   const ctaBgImageUrl = ctaBlock?.data?.background_image_url || null;
 
-  // Filter and pool posts based on all dynamic-post-feed blocks
+  // Pool all posts — the Information page is the main listing page, so it should
+  // display ALL available posts (not limit them by dynamic-post-feed block caps).
   const getCmsPostsPool = () => {
     // Normalize static fallback posts
     const staticPosts = LATEST_INFO.map(p => ({
@@ -139,41 +139,8 @@ const Information: React.FC = () => {
     staticPosts.forEach(p => allPostsMap.set(p.id, p));
     cmsPosts.forEach(p => allPostsMap.set(p.id, p));
 
-    const allUnifiedPosts = Array.from(allPostsMap.values());
-
-    if (feedBlocks.length === 0) {
-      return allUnifiedPosts;
-    }
-
-    const matchedPostsMap = new Map<number, any>();
-    
-    feedBlocks.forEach(block => {
-      if (!block || !block.data) return;
-      // Sort descending by ID so newest posts are first
-      let postsList = [...allUnifiedPosts].sort((a, b) => b.id - a.id);
-      const { category, limit, sort_order, selection_mode, selected_post_ids } = block.data || {};
-      
-      if (selection_mode === 'manual' && Array.isArray(selected_post_ids) && selected_post_ids.length > 0) {
-        postsList = postsList.filter(post => post && selected_post_ids.map(id => Number(id)).includes(Number(post.id)));
-      } else {
-        if (category && category !== 'Semua Kategori' && category !== 'All') {
-          postsList = postsList.filter(post => post && post.category && post.category.toLowerCase() === category.toLowerCase());
-        }
-      }
-      
-      if (sort_order === 'asc') {
-        postsList = postsList.reverse();
-      }
-      
-      const maxLimit = typeof limit === 'number' ? limit : parseInt(limit) || 6;
-      postsList.slice(0, maxLimit).forEach(post => {
-        if (post && post.id) {
-          matchedPostsMap.set(post.id, post);
-        }
-      });
-    });
-    
-    return Array.from(matchedPostsMap.values());
+    // Return ALL unified posts sorted by newest first — no feed-block limit applied
+    return Array.from(allPostsMap.values()).sort((a, b) => b.id - a.id);
   };
 
   const basePosts = getCmsPostsPool();
