@@ -82,6 +82,8 @@ export interface CmsPost {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  category_name?: string;
+  category_slug?: string;
 }
 
 export interface SocialLink {
