@@ -27,7 +27,7 @@ const normalizeCmsPost = (post: CmsPost | any) => {
     id: post.id,
     title: post.title,
     date: formatPostDate(post.created_at),
-    category: post.category_name || post.category || "Berita",
+    category: post.category_name || "Berita",
     image: contentItem?.featured_image || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1974&auto=format&fit=crop",
     excerpt: post.excerpt || contentItem?.excerpt || "",
     content: contentItem?.body_content || ""
