@@ -167,7 +167,7 @@ const InformationDetail: React.FC = () => {
             transition={{ delay: 0.3 }}
             className="prose prose-xl prose-slate max-w-none"
           >
-            {info.content.startsWith('<') ? (
+            {/<[a-z][\s\S]*>/i.test(info.content) ? (
               <div 
                 className="text-gray-600 leading-relaxed font-medium text-xl prose max-w-none"
                 dangerouslySetInnerHTML={{ __html: info.content }}
