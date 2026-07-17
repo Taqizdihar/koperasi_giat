@@ -57,4 +57,24 @@
       radial-gradient(at 100% 100%, rgba(225, 29, 72, 0.05) 0px, transparent 50%),
       radial-gradient(at 0% 100%, rgba(30, 58, 138, 0.05) 0px, transparent 50%);
   }
+
+  /* HTML Typography Overrides for CMS Content */
+  .prose ul {
+    @apply list-disc list-outside ml-6 space-y-2 mb-6;
+  }
+  .prose ol {
+    @apply list-decimal list-outside ml-6 space-y-2 mb-6;
+  }
+  .prose p {
+    @apply mb-6;
+  }
+  .prose h1, .prose h2, .prose h3 {
+    @apply text-giat-blue font-black mt-8 mb-4;
+  }
+  .prose strong {
+    @apply font-black text-gray-900;
+  }
+  .prose a {
+    @apply text-giat-red font-bold hover:underline;
+  }
 }
