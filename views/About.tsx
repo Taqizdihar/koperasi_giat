@@ -272,8 +272,26 @@ const About: React.FC = () => {
   const ctaHeadline = ctaBlock?.data?.headline || "Mari Tumbuh Bersama Kami";
   const ctaSubHeadline = ctaBlock?.data?.sub_headline || "Bergabunglah dengan ribuan anggota lainnya dan rasakan manfaat nyata dari ekonomi gotong royong yang modern.";
   const ctaButtonText = ctaBlock?.data?.button_text || "Mulai Bergabung Sekarang";
+  const ctaButtons: Array<{ text: string; link: string }> = ctaBlock?.data?.buttons?.length
+    ? ctaBlock.data.buttons
+    : [{ text: ctaButtonText, link: ctaBlock?.data?.button_link || '/keanggotaan' }];
   const ctaBgColor = ctaBlock?.data?.background_color || "#163C8F";
   const ctaBgImage = ctaBlock?.data?.background_image_url || "";
+
+  // Keep each existing section's design, but place it where its CMS block is.
+  // The organization section groups its header and team blocks together.
+  const blockPositions = new Map<PageBlock, number>(aboutPage?.content?.map((block, index) => [block, index]));
+  const sectionBlocks: Record<string, Array<PageBlock | undefined>> = {
+    hero: [heroBlock],
+    history: [historyBlock],
+    vision: [visiMisiBlock],
+    values: [nilaiBlock],
+    team: [teamHeaderBlock, ...teamBlocks],
+    cta: [ctaBlock],
+  };
+  const sectionPosition = (key: string) => Math.min(...sectionBlocks[key].map(block =>
+    block ? blockPositions.get(block) ?? Infinity : Infinity
+  ));
 
   if (loading) {
     return (
@@ -293,8 +311,9 @@ const About: React.FC = () => {
 
   return (
     <div>
-      {/* Header - Redesigned to be flush with Navbar */}
-      <section className={`relative pt-32 pb-20 md:pt-44 md:pb-32 text-white overflow-hidden ${heroBgImage ? 'bg-black' : 'bg-giat-blue'}`}>
+      {[
+      // Header - Redesigned to be flush with Navbar
+      <section key="hero" className={`relative pt-32 pb-20 md:pt-44 md:pb-32 text-white overflow-hidden ${heroBgImage ? 'bg-black' : 'bg-giat-blue'}`}>
         {heroBgImage && (
           <>
             <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent z-10" />
@@ -317,10 +336,10 @@ const About: React.FC = () => {
             {heroSubHeadline}
           </p>
         </div>
-      </section>
+      </section>,
 
-      {/* History */}
-      <section className="py-24">
+      // History
+      <section key="history" className="py-24">
         <div className="container mx-auto px-4 md:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-16">
             <div className="lg:w-1/2 relative group">
@@ -351,10 +370,10 @@ const About: React.FC = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section>,
 
-      {/* Visi Misi */}
-      <section className="py-24 bg-gray-50 relative overflow-hidden">
+      // Visi Misi
+      <section key="vision" className="py-24 bg-gray-50 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-giat-blue/5 rounded-full blur-3xl -mr-48 -mt-48"></div>
         <div className="container mx-auto px-4 md:px-8 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -384,10 +403,10 @@ const About: React.FC = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section>,
 
-      {/* Nilai-Nilai Koperasi GIAT */}
-      <section className="py-24">
+      // Nilai-Nilai Koperasi GIAT
+      <section key="values" className="py-24">
         <div className="container mx-auto px-4 md:px-8 text-center relative z-10">
           <div className="mb-20 space-y-4">
             <h2 className="text-giat-red font-bold tracking-widest uppercase text-sm">{nilaiSubtitle}</h2>
@@ -419,10 +438,10 @@ const About: React.FC = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section>,
 
-      {/* Struktur Organisasi Section */}
-      <section className="py-32 bg-gray-50 overflow-hidden">
+      // Struktur Organisasi Section
+      <section key="team" className="py-32 bg-gray-50 overflow-hidden">
         <div className="container mx-auto px-4 md:px-8">
           <div className="text-center mb-24 space-y-4">
             <h2 className="text-giat-red font-bold tracking-widest uppercase text-sm">{teamSubtitle}</h2>
@@ -527,10 +546,10 @@ const About: React.FC = () => {
             )}
           </div>
         </div>
-      </section>
+      </section>,
 
-      {/* Join Section */}
-      <section className="py-32 bg-white">
+      // Join Section
+      <section key="cta" className="py-32 bg-white">
         <div className="container mx-auto px-4 max-w-5xl">
           <div 
             style={{ 
@@ -554,15 +573,24 @@ const About: React.FC = () => {
               <p className="text-blue-100/70 text-xl max-w-2xl mx-auto font-bold leading-relaxed">
                 {ctaSubHeadline}
               </p>
-              <div className="pt-6">
-                <button className="bg-giat-red text-white px-12 py-6 rounded-3xl font-black text-xl hover:bg-red-700 transition-all shadow-xl shadow-red-600/30 hover:-translate-y-2 active:scale-95">
-                  {ctaButtonText}
-                </button>
+              <div className="pt-6 flex flex-wrap justify-center gap-4">
+                {ctaButtons.map((button, index) => (
+                  <a
+                    key={index}
+                    href={button.link}
+                    target={/^https?:\/\//i.test(button.link) ? '_blank' : undefined}
+                    rel={/^https?:\/\//i.test(button.link) ? 'noopener noreferrer' : undefined}
+                    className="inline-flex items-center justify-center bg-giat-red text-white px-12 py-6 rounded-3xl font-black text-xl hover:bg-red-700 transition-all shadow-xl shadow-red-600/30 hover:-translate-y-2 active:scale-95"
+                  >
+                    {button.text}
+                  </a>
+                ))}
               </div>
             </motion.div>
           </div>
         </div>
-      </section>
+      </section>,
+      ].sort((a, b) => sectionPosition(String(a.key)) - sectionPosition(String(b.key)))}
     </div>
   );
 };
