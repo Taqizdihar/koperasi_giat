@@ -327,9 +327,10 @@ const Services: React.FC = () => {
           id: `cms-retail-${idx}`,
           title: item.title || fallback.title,
           description: item.description || fallback.description,
-          location: item.location || fallback.location,
+          location: item.alamat || item.location || fallback.location,
           image: item.icon_url || fallback.image,
-          link: item.link_url || '/kontak'
+          link: item.link_url || '/kontak',
+          labels: item.labels || []
         };
       })
     : RETAIL_PRODUCTS;
@@ -465,10 +466,18 @@ const Services: React.FC = () => {
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-giat-blue/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-white/90 backdrop-blur-md text-giat-blue px-4 py-1.5 rounded-full text-xs font-black shadow-lg">
-                      Retail Unit
-                    </span>
+                  <div className="absolute top-4 left-4 flex gap-2 flex-wrap">
+                    {(product as any).labels && (product as any).labels.length > 0 ? (
+                      (product as any).labels.slice(0, 1).map((label: string, i: number) => (
+                        <span key={i} className="bg-white/90 backdrop-blur-md text-giat-blue px-4 py-1.5 rounded-full text-xs font-black shadow-lg">
+                          {label}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="bg-white/90 backdrop-blur-md text-giat-blue px-4 py-1.5 rounded-full text-xs font-black shadow-lg">
+                        Retail Unit
+                      </span>
+                    )}
                   </div>
                 </div>
 

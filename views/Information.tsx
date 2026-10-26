@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { LATEST_INFO } from '../constants';
+
 import { Search, Filter, Calendar, User, ArrowRight } from 'lucide-react';
 import { fetchCmsPages, fetchCmsPosts } from '../services/dataService';
 import { CmsPage, CmsPost, PageBlock } from '../types';
@@ -27,7 +27,7 @@ const normalizeCmsPost = (post: CmsPost | any) => {
     id: post.id,
     title: post.title,
     date: formatPostDate(post.created_at),
-    category: contentItem?.tags || post.category_name || post.category || "Berita",
+    category: post.category_name || "Berita",
     image: contentItem?.featured_image || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1974&auto=format&fit=crop",
     excerpt: post.excerpt || contentItem?.excerpt || "",
     content: contentItem?.body_content || ""
@@ -71,7 +71,7 @@ const Information: React.FC = () => {
   const [posts, setPosts] = useState<CmsPost[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [visibleCount, setVisibleCount] = useState(4);
+  const [visibleCount, setVisibleCount] = useState(6);
 
   useEffect(() => {
     const loadData = async () => {
@@ -105,7 +105,6 @@ const Information: React.FC = () => {
   const infoPagesArray = pages && Array.isArray(pages) ? pages : [];
   const infoPage = infoPagesArray.find(p => p && p.slug === 'informasi') || infoPagesArray[0];
   const richTextBlock = infoPage?.content?.find((block: PageBlock) => block && block.type === 'rich-text');
-  const feedBlocks = infoPage?.content?.filter((block: PageBlock) => block && block.type === 'dynamic-post-feed') || [];
   const ctaBlock = infoPage?.content?.find((block: PageBlock) => block && block.type === 'cta-banner');
 
   const parsedHeader = richTextBlock?.data?.content ? parseInfoRichText(richTextBlock.data.content) : null;
@@ -121,59 +120,14 @@ const Information: React.FC = () => {
   const ctaBgColor = ctaBlock?.data?.background_color || '#F9FAFB';
   const ctaBgImageUrl = ctaBlock?.data?.background_image_url || null;
 
-  // Filter and pool posts based on all dynamic-post-feed blocks
+  // Only display posts fetched from the CMS API — no hardcoded/static posts.
   const getCmsPostsPool = () => {
-    // Normalize static fallback posts
-    const staticPosts = LATEST_INFO.map(p => ({
-      ...p,
-      content: p.content // ensure standard format
-    }));
-
-    // Normalize CMS fetched posts
     const cmsPosts = posts && Array.isArray(posts) 
       ? posts.filter(p => p && p.id).map(normalizeCmsPost) 
       : [];
 
-    // Combine them in a Map to avoid duplicates by ID (CMS overwrites static ones if they share ID)
-    const allPostsMap = new Map<number, any>();
-    staticPosts.forEach(p => allPostsMap.set(p.id, p));
-    cmsPosts.forEach(p => allPostsMap.set(p.id, p));
-
-    const allUnifiedPosts = Array.from(allPostsMap.values());
-
-    if (feedBlocks.length === 0) {
-      return allUnifiedPosts;
-    }
-
-    const matchedPostsMap = new Map<number, any>();
-    
-    feedBlocks.forEach(block => {
-      if (!block || !block.data) return;
-      // Sort descending by ID so newest posts are first
-      let postsList = [...allUnifiedPosts].sort((a, b) => b.id - a.id);
-      const { category, limit, sort_order, selection_mode, selected_post_ids } = block.data || {};
-      
-      if (selection_mode === 'manual' && Array.isArray(selected_post_ids) && selected_post_ids.length > 0) {
-        postsList = postsList.filter(post => post && selected_post_ids.map(id => Number(id)).includes(Number(post.id)));
-      } else {
-        if (category && category !== 'Semua Kategori' && category !== 'All') {
-          postsList = postsList.filter(post => post && post.category && post.category.toLowerCase() === category.toLowerCase());
-        }
-      }
-      
-      if (sort_order === 'asc') {
-        postsList = postsList.reverse();
-      }
-      
-      const maxLimit = typeof limit === 'number' ? limit : parseInt(limit) || 6;
-      postsList.slice(0, maxLimit).forEach(post => {
-        if (post && post.id) {
-          matchedPostsMap.set(post.id, post);
-        }
-      });
-    });
-    
-    return Array.from(matchedPostsMap.values());
+    // Sort by newest first
+    return cmsPosts.sort((a, b) => b.id - a.id);
   };
 
   const basePosts = getCmsPostsPool();

@@ -27,7 +27,7 @@ const normalizeCmsPost = (post: CmsPost) => {
     id: post.id,
     title: post.title,
     date: formatPostDate(post.created_at),
-    category: contentItem?.tags || post.category || "Berita",
+    category: post.category_name || "Berita",
     image: contentItem?.featured_image || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1974&auto=format&fit=crop",
     excerpt: post.excerpt || contentItem?.excerpt || "",
     content: contentItem?.body_content || ""
@@ -167,7 +167,7 @@ const InformationDetail: React.FC = () => {
             transition={{ delay: 0.3 }}
             className="prose prose-xl prose-slate max-w-none"
           >
-            {info.content.startsWith('<') ? (
+            {/<[a-z][\s\S]*>/i.test(info.content) ? (
               <div 
                 className="text-gray-600 leading-relaxed font-medium text-xl prose max-w-none"
                 dangerouslySetInnerHTML={{ __html: info.content }}
